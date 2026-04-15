@@ -26,6 +26,10 @@ find_package(Vulkan REQUIRED)
 
 add_executable(${TARGET_NAME} main.cpp)
 
+target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+
+target_link_libraries(${TARGET_NAME} PRIVATE Vulkan::Vulkan glfw glm::glm)
+
 ###SHADER COMPILATION###
 #find shaders
 file(GLOB_RECURSE SHADERS
@@ -80,7 +84,7 @@ add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
 )
 
 
-#link libraries
-target_link_libraries(${TARGET_NAME} PRIVATE Vulkan::Vulkan glfw glm::glm)
+
+
 
 
