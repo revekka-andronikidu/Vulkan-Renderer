@@ -24,7 +24,10 @@ FetchContent_MakeAvailable(GLM)
 #make sure vulkan is installed
 find_package(Vulkan REQUIRED)
 
-add_executable(${TARGET_NAME} main.cpp)
+add_executable(${TARGET_NAME} 
+main.cpp
+VulkanRenderer.cpp
+)
 
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
