@@ -2,6 +2,9 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <string>
+#include <cstdint>
+
 //const uint32_t WIDTH = 800;
 //const uint32_t HEIGHT = 600;
 
@@ -18,12 +21,21 @@ public:
 		glfwDestroyWindow(m_window);
 		glfwTerminate();
 	}
+
+	
+	Window(const Window&) = delete;
+	Window& operator=(const Window&) = delete;
+	Window(Window&&) = delete;
+	Window& operator=(Window&&) = delete;
+
+	
+
 	bool ShouldClose() const
 	{
 		return glfwWindowShouldClose(m_window);
 	}
-	void PollEvents() const;
-	VkSurfaceKHR CreateSurface(VkInstance instance) const;
+	//void PollEvents() const;
+	//VkSurfaceKHR CreateSurface(VkInstance instance) const;
 
 	GLFWwindow* GetWindow() const { return m_window; }
 

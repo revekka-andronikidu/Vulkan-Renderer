@@ -27,6 +27,7 @@ find_package(Vulkan REQUIRED)
 add_executable(${TARGET_NAME} 
 main.cpp
 VulkanRenderer.cpp
+Vulkan/SwapChain.cpp
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)

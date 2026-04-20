@@ -7,7 +7,11 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-VulkanRenderer::VulkanRenderer()
+VulkanRenderer::VulkanRenderer() 
+    : window()
+      ,context(window)
+	  ,device(context)
+	  ,swapChain(window, context.GetSurface(), device)
 {
 	//initWindow();
 	initVulkan();
@@ -78,9 +82,9 @@ void VulkanRenderer::CreateTextureImage()
     createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
     void* data;
-    vkMapMemory(device, stagingBufferMemory, 0, imageSize, 0, &data);
+    vkMapMemory(device.GetDevice(), stagingBufferMemory, 0, imageSize, 0, &data);
     memcpy(data, pixels, static_cast<size_t>(imageSize));
-    vkUnmapMemory(device, stagingBufferMemory);
+    vkUnmapMemory(device.GetDevice(), stagingBufferMemory);
 
     stbi_image_free(pixels);
 
@@ -100,7 +104,7 @@ void VulkanRenderer::CreateTextureImage()
         transitionImageLayout(textureImage, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     }
 
-    vkDestroyBuffer(device, stagingBuffer, nullptr);
-    vkFreeMemory(device, stagingBufferMemory, nullptr);
+    vkDestroyBuffer(device.GetDevice(), stagingBuffer, nullptr);
+    vkFreeMemory(device.GetDevice(), stagingBufferMemory, nullptr);
 
 }
