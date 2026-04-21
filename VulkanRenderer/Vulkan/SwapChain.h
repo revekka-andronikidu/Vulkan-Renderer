@@ -21,20 +21,18 @@ public:
 	VkSwapchainKHR GetHandle() const { return m_SwapChain; }
 	const std::vector<Image>& GetSwapChainImages() const;
 	void RecreateSwapChain();
-	/* 
-	const std::vector<VkImageView>& GetImageViews() const { return imageViews; }
-	VkFormat GetImageFormat() const { return imageFormat; }*/
-	VkExtent2D GetExtent() const { return swapChainExtent; }
+	VkExtent2D GetExtent() const { return m_SwapChainExtent; }
+	VkFormat GetSwapChainImageFormat() const;
 
 private:
-	Device& device;
-	Window& window;
-	VkSurfaceKHR surface;
+	Device& m_Device;
+	Window& m_Window;
+	VkSurfaceKHR m_Surface;
 	VkSwapchainKHR m_SwapChain;
-	std::vector<Image> swapChainImages;
+	std::vector<Image> m_SwapChainImages;
 	/*std::vector<VkImageView> imageViews;
 	VkFormat imageFormat;*/
-	VkExtent2D swapChainExtent;
+	VkExtent2D m_SwapChainExtent;
 
 	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	void CreateSwapChain();

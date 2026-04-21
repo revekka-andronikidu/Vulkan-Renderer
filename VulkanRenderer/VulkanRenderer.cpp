@@ -12,6 +12,8 @@ VulkanRenderer::VulkanRenderer()
       ,context(window)
 	  ,device(context)
 	  ,swapChain(window, context.GetSurface(), device)
+	  ,commandPool(device)
+	  , pipeline(device, swapChain.GetSwapChainImageFormat())
 {
 	//initWindow();
 	initVulkan();

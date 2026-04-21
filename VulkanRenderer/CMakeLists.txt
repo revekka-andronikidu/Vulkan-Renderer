@@ -28,6 +28,8 @@ add_executable(${TARGET_NAME}
 main.cpp
 VulkanRenderer.cpp
 Vulkan/SwapChain.cpp
+Vulkan/CommandPool.cpp
+Vulkan/Pipeline.cpp
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
