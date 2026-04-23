@@ -30,7 +30,12 @@ VulkanRenderer.cpp
 Vulkan/SwapChain.cpp
 Vulkan/CommandPool.cpp
 Vulkan/Pipeline.cpp
-)
+Vulkan/Resources/Buffers.cpp
+Vulkan/Resources/Image.cpp
+Vulkan/Resources/ResourceManager.cpp
+Vulkan/Resources/Mesh.cpp
+Vulkan/Resources/Material.cpp
+Vulkan/Resources/DescriptorPool.cpp "Vulkan/UniformBuffer.cpp")
 
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 

@@ -1,36 +1,36 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
+#include "RenderPass.h"
 
 class Device;
 class Pipeline final
 {
 public:
-	Pipeline(Device& device, VkFormat swapChainImageFormat);
+	Pipeline(Device& device, VkFormat swapChainImageFormat, VkRenderPass renderPass);
 	~Pipeline();
 
 	Pipeline(const Pipeline&) = delete;
 	Pipeline& operator=(const Pipeline&) = delete;
 	Pipeline(Pipeline&&) = delete;
 	Pipeline& operator=(Pipeline&&) = delete;
-
-	VkRenderPass GetRenderPass() const { return m_RenderPass; }
 	VkPipelineLayout GetPipelineLayout() const { return m_PipelineLayout; }
-	VkPipeline GetGraphicsPipeline() const { return m_GraphicsPipeline; }
-	VkDescriptorSetLayout GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }
-
+	VkDescriptorSetLayout GetMaterialSetLayout() const { return m_MaterialDescriptorSetLayout; }
+	VkDescriptorSetLayout GetGlobalSetLayout() const { return m_GlobalDescriptorSetLayout; }
+	void Bind(VkCommandBuffer commandBuffer) const;
 
 private:
 	Device& m_Device;
-	VkRenderPass m_RenderPass;
-	VkPipelineLayout m_PipelineLayout;
 	VkPipeline m_GraphicsPipeline;
-	VkDescriptorSetLayout m_DescriptorSetLayout;
+	VkPipelineLayout m_PipelineLayout;
+	VkDescriptorSetLayout m_MaterialDescriptorSetLayout;
+	VkDescriptorSetLayout m_GlobalDescriptorSetLayout;
 	VkFormat m_SwapChainImageFormat;
+	VkRenderPass m_RenderPass;
 
 	void CreateGraphicsPipeline();
-	void CreateDescriptorSetLayout();
-	void CreateRenderPass();
+	void CreateMaterialDescriptorSetLayout();
+	void CreateGlobalDescriptorSetLayout();
 	VkShaderModule CreateShaderModule(const std::vector<char>& code);
 
 };

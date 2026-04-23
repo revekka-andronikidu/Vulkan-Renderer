@@ -4,6 +4,7 @@
 
 CommandPool::CommandPool(Device& device)
     : m_Device(device)
+	, m_CommandPool(VK_NULL_HANDLE)
 {
     CreateCommandPool();
     CreateCommandBuffers();
@@ -78,4 +79,27 @@ void CommandPool::CreateCommandBuffers()
     if (vkAllocateCommandBuffers(m_Device.GetDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate command buffers!");
     }
+}
+
+VkCommandBuffer CommandPool::BeginRecording(uint32_t frameIndex)
+{
+    VkCommandBuffer commandBuffer = m_CommandBuffers[frameIndex];
+
+    vkResetCommandBuffer(commandBuffer, 0);
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = 0;
+    beginInfo.pInheritanceInfo = nullptr;
+
+    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+        throw std::runtime_error("failed to begin recording command buffer!");
+
+    return commandBuffer;
+}
+
+void CommandPool::EndRecording(uint32_t frameIndex)
+{
+    if (vkEndCommandBuffer(m_CommandBuffers[frameIndex]) != VK_SUCCESS)
+        throw std::runtime_error("failed to record command buffer!");
 }

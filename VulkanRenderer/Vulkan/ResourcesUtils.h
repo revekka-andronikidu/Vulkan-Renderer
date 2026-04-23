@@ -1,54 +1,14 @@
 #pragma once
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
-
-
-#include <glm/glm.hpp>
 #include <array>
-#include <vulkan/vulkan.h>
-#include <vector>
-#include <string>
 #include <fstream>
-#include <stdexcept>
-#include <functional>
-#include <cstddef>
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
-struct Image {
-    VkImage image;
-    VkDeviceMemory memory;
-    VkImageView view;
-    VkFormat format;
-    VkImageAspectFlags aspectMask;
-    uint32_t mipLevels;
-};
-
-inline void CreateImageView(Device& device, Image& image)
-{
-    VkImageViewCreateInfo viewInfo{};
-    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    viewInfo.image = image.image;
-    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    viewInfo.format = image.format;
-    viewInfo.subresourceRange.aspectMask = image.aspectMask;
-    viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-    viewInfo.subresourceRange.baseMipLevel = 0;
-    viewInfo.subresourceRange.levelCount = image.mipLevels;;
-    viewInfo.subresourceRange.baseArrayLayer = 0;
-    viewInfo.subresourceRange.layerCount = 1;
-
-    if (vkCreateImageView(device.GetDevice(), &viewInfo, nullptr, &image.view) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create texture image view!");
-    }
-}
+#include <vulkan/vulkan.h>
 
 static std::vector<char> ReadFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
@@ -113,4 +73,18 @@ namespace std
             return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^ (hash<glm::vec2>()(vertex.texCoord) << 1);
         }
     };
+}
+
+inline uint32_t FindMemoryType(VkPhysicalDevice device, uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(device, &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+
+    throw std::runtime_error("failed to find suitable memory type!");
 }

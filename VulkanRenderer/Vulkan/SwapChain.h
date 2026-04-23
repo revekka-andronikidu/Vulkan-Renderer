@@ -1,15 +1,16 @@
 #pragma once
 #include <vector>
 #include <vulkan/vulkan.h>
+#include <memory> 
 
-struct Image;
+class Image;
 class Device;
 class Window;
-
+class CommandPool;
 class SwapChain final
 {
 public:
-	SwapChain(Window& window, VkSurfaceKHR surface, Device& device);
+	SwapChain(Window& window, VkSurfaceKHR surface, Device& device, CommandPool& commandPool);
 	~SwapChain();
 
 	SwapChain(const SwapChain&) = delete;
@@ -20,16 +21,27 @@ public:
 
 	VkSwapchainKHR GetHandle() const { return m_SwapChain; }
 	const std::vector<Image>& GetSwapChainImages() const;
-	void RecreateSwapChain();
+	void RecreateSwapChain(VkRenderPass renderPass);
 	VkExtent2D GetExtent() const { return m_SwapChainExtent; }
+	std::vector<VkFramebuffer> GetSwapChainFramebuffers() const { return m_SwapChainFramebuffers; }
 	VkFormat GetSwapChainImageFormat() const;
+
+	void BeginRenderPass(VkCommandBuffer commandBuffer, VkRenderPass renderPass, uint32_t imageIndex);
+	void EndRenderPass(VkCommandBuffer commandBuffer);
+
+	void CreateFramebuffers(VkRenderPass renderPass);
+
 
 private:
 	Device& m_Device;
 	Window& m_Window;
 	VkSurfaceKHR m_Surface;
 	VkSwapchainKHR m_SwapChain;
+	std::unique_ptr<Image> m_DepthImage;
 	std::vector<Image> m_SwapChainImages;
+	std::vector<VkFramebuffer> m_SwapChainFramebuffers;
+	CommandPool& m_CommandPool;
+
 	/*std::vector<VkImageView> imageViews;
 	VkFormat imageFormat;*/
 	VkExtent2D m_SwapChainExtent;
@@ -39,5 +51,6 @@ private:
 	void CleanupSwapChain();
 	VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 	VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+	void CreateDepthResources();
 	void CreateImageViews();
 };

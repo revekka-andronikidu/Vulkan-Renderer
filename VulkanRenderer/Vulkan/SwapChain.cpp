@@ -6,18 +6,23 @@
 #include <stdexcept>
 #include <algorithm>
 #include <GLFW/glfw3.h>
+#include "Resources/Image.h"
+#include "CommandPool.h"
 
-
-SwapChain::SwapChain(Window& window, VkSurfaceKHR surface, Device& device)
+SwapChain::SwapChain(Window& window, VkSurfaceKHR surface, Device& device, CommandPool& commandPool)
 	: m_Window(window)
     , m_Device(device)
     , m_Surface(surface)
 	, m_SwapChain(VK_NULL_HANDLE)
 	, m_SwapChainExtent({ 0, 0 })
     , m_SwapChainImages{}
+	, m_CommandPool(commandPool)
 { 
 	CreateSwapChain();
-    CreateImageViews();
+    CreateImageViews(); 
+
+    CreateDepthResources();
+   // CreateFramebuffers();
 }
 
 SwapChain::~SwapChain()
@@ -75,15 +80,17 @@ void SwapChain::CreateSwapChain()
     std::vector<VkImage> rawImages(imageCount);
     vkGetSwapchainImagesKHR(m_Device.GetDevice(), m_SwapChain, &imageCount, rawImages.data());
 
-    m_SwapChainImages.resize(imageCount);
+    m_SwapChainImages.clear();
+    m_SwapChainImages.reserve(imageCount);
+
     for (uint32_t i = 0; i < imageCount; i++)
     {
-        m_SwapChainImages[i].image = rawImages[i];
-        m_SwapChainImages[i].memory = VK_NULL_HANDLE;
-        m_SwapChainImages[i].view = VK_NULL_HANDLE;
-        m_SwapChainImages[i].format = surfaceFormat.format;;
-        m_SwapChainImages[i].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        m_SwapChainImages[i].mipLevels = 1;
+        m_SwapChainImages.emplace_back(
+            m_Device,
+            rawImages[i],
+            surfaceFormat.format,
+            VK_IMAGE_ASPECT_COLOR_BIT
+        );
     }
 
     m_SwapChainExtent = extent;
@@ -100,15 +107,8 @@ VkSurfaceFormatKHR SwapChain::ChooseSwapSurfaceFormat(const std::vector<VkSurfac
     return availableFormats[0];
 }
 
-void SwapChain::CreateImageViews()
+void SwapChain::RecreateSwapChain(VkRenderPass renderPass) 
 {
-    for (size_t i = 0; i < m_SwapChainImages.size(); i++)
-    {
-        CreateImageView(m_Device, m_SwapChainImages[i]);
-    }
-}
-
-void SwapChain::RecreateSwapChain() {
     int width = 0, height = 0;
     glfwGetFramebufferSize(m_Window.GetWindow(), &width, &height);
     while (width == 0 || height == 0) {
@@ -121,23 +121,30 @@ void SwapChain::RecreateSwapChain() {
 
     CreateSwapChain();
     CreateImageViews();
-    //createDepthResources();
-    //createFramebuffers();
+
+
+    CreateDepthResources();
+    CreateFramebuffers(renderPass);
+}
+
+void SwapChain::CreateImageViews()
+{
+    for (size_t i = 0; i < m_SwapChainImages.size(); i++)
+    {
+        m_SwapChainImages[i].CreateImageView();
+    }
 }
 
 void SwapChain::CleanupSwapChain() {
 
-    /*vkDestroyImageView(device.GetDevice(), depthImage.view, nullptr);
-    vkDestroyImage(device.GetDevice(), depthImage.image, nullptr);
-    vkFreeMemory(device.GetDevice(), depthImage.memory, nullptr);
-
-    for (auto framebuffer : swapChainFramebuffers) {
-        vkDestroyFramebuffer(device.GetDevice(), framebuffer, nullptr);
-    }*/
-
-    for (auto imageView : m_SwapChainImages) {
-        vkDestroyImageView(m_Device.GetDevice(), imageView.view, nullptr);
+    for (auto framebuffer : m_SwapChainFramebuffers) {
+        vkDestroyFramebuffer(m_Device.GetDevice(), framebuffer, nullptr);
     }
+
+    /*for (auto& imageView : m_SwapChainImages) 
+    {
+        vkDestroyImageView(m_Device.GetDevice(), imageView.m_ImageView, nullptr);
+    }*/
 
     vkDestroySwapchainKHR(m_Device.GetDevice(), m_SwapChain, nullptr);
 }
@@ -179,5 +186,65 @@ const std::vector<Image>& SwapChain::GetSwapChainImages() const
 
 VkFormat SwapChain::GetSwapChainImageFormat() const
 {
-    return m_SwapChainImages.empty() ? VK_FORMAT_UNDEFINED : m_SwapChainImages[0].format;
+    return m_SwapChainImages.empty() ? VK_FORMAT_UNDEFINED : m_SwapChainImages[0].m_Format;
+}
+
+void SwapChain::CreateDepthResources()
+{
+    VkFormat depthFormat = m_Device.FindDepthFormat();
+
+    m_DepthImage = std::make_unique<Image>(m_Device, m_SwapChainExtent.width, m_SwapChainExtent.height, 1, VK_SAMPLE_COUNT_1_BIT, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+    m_DepthImage->TransitionImageLayout(m_CommandPool, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+}
+
+void SwapChain::CreateFramebuffers(VkRenderPass renderPass)
+{
+    m_SwapChainFramebuffers.resize(m_SwapChainImages.size());
+
+    for (size_t i = 0; i < m_SwapChainImages.size(); i++)
+    {
+        std::array<VkImageView, 2> attachments = 
+        {
+            m_SwapChainImages[i].m_ImageView,
+            m_DepthImage->m_ImageView
+        };
+
+
+        VkFramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = renderPass;
+        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());;
+        framebufferInfo.pAttachments = attachments.data();;
+        framebufferInfo.width = m_SwapChainExtent.width;
+        framebufferInfo.height = m_SwapChainExtent.height;
+        framebufferInfo.layers = 1;
+
+        if (vkCreateFramebuffer(m_Device.GetDevice(), &framebufferInfo, nullptr, &m_SwapChainFramebuffers[i]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create framebuffer!");
+        }
+    }
+}
+
+void SwapChain::BeginRenderPass(VkCommandBuffer commandBuffer, VkRenderPass renderPass, uint32_t imageIndex)
+{
+    std::array<VkClearValue, 2> clearValues{};
+    clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+    clearValues[1].depthStencil = { 1.0f, 0 };
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = renderPass;
+    renderPassInfo.framebuffer = m_SwapChainFramebuffers[imageIndex];
+    renderPassInfo.renderArea.offset = { 0, 0 };
+    renderPassInfo.renderArea.extent = m_SwapChainExtent;
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());;
+    renderPassInfo.pClearValues = clearValues.data();;
+
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void SwapChain::EndRenderPass(VkCommandBuffer cmd)
+{
+    vkCmdEndRenderPass(cmd);
 }
