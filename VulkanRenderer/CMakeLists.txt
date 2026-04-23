@@ -30,7 +30,7 @@ VulkanRenderer.cpp
 Vulkan/SwapChain.cpp
 Vulkan/CommandPool.cpp
 Vulkan/Pipeline.cpp
-Vulkan/Resources/Buffers.cpp
+Vulkan/Resources/Buffer.cpp
 Vulkan/Resources/Image.cpp
 Vulkan/Resources/ResourceManager.cpp
 Vulkan/Resources/Mesh.cpp

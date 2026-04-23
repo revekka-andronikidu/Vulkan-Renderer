@@ -6,7 +6,7 @@
 #include "../ResourcesUtils.h"
 #include <iostream>
 
-#include "Buffers.h"
+#include "Buffer.h"
 
 
 Mesh::Mesh(Device& device, CommandPool& commandPool, const std::string& path)

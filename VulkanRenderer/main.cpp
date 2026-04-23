@@ -6,8 +6,7 @@ class VulkanApplication
     public:
     void run() 
     {
-
-		renderer.run();
+		renderer.Run();
 	}
 
 private:
