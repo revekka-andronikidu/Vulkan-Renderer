@@ -15,7 +15,6 @@ public:
     Material(Device& device, CommandPool& commandPool, DescriptorPool& pool, VkDescriptorSetLayout descriptorSetLayout, const std::string& texturePath, std::shared_ptr<TextureSampler> textureSampler);
 	~Material();
 
-
 	Material(const Material&) = delete;
 	Material& operator=(const Material&) = delete;
 	Material(Material&&) = delete;
@@ -33,6 +32,5 @@ private:
 
     void CreateTextureImage();
 	void WriteDescriptorSet();
-
 };
 

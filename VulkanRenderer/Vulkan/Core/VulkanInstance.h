@@ -27,43 +27,8 @@ public:
 
     VulkanInstance(const VulkanInstance&) = delete;
     VulkanInstance& operator=(const VulkanInstance&) = delete;
-
-    //VulkanInstance(VulkanInstance&& other) noexcept;
-    //VulkanInstance& operator=(VulkanInstance&& other) noexcept;
-
-
-    VulkanInstance(VulkanInstance&& other) noexcept
-    {
-        instance = other.instance;
-        debugMessenger = other.debugMessenger;
-        //deviceExtensions = other.deviceExtensions;
-    }
-
-    VulkanInstance& operator=(VulkanInstance&& other) noexcept
-    {
-        if (this != &other)
-        {
-            // destroy current resources if needed
-            if (debugMessenger != VK_NULL_HANDLE)
-            {
-                // vkDestroyDebugUtilsMessengerEXT(...)
-            }
-
-            if (instance != VK_NULL_HANDLE)
-            {
-                vkDestroyInstance(instance, nullptr);
-            }
-
-            instance = other.instance;
-            debugMessenger = other.debugMessenger;
-
-            other.instance = VK_NULL_HANDLE;
-            other.debugMessenger = VK_NULL_HANDLE;
-        }
-
-        return *this;
-    }
-
+    VulkanInstance(VulkanInstance&& other) = delete;
+    VulkanInstance& operator=(VulkanInstance&& other) = delete;
 
     ~VulkanInstance()
     {
@@ -73,8 +38,6 @@ public:
 
     VkInstance GetInstance() const { return instance; };
     const std::vector<const char*>& GetValidationLayers() const { return validationLayers; };
-
-
 
 private:
 	VkInstance instance;

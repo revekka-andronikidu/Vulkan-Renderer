@@ -1,19 +1,17 @@
 #include "UniformBuffer.h"
-#include "VulkanContext/Device.h"
-#include "CommandPool.h"
-#include "Resources/DescriptorPool.h"
+#include "../Core/Device.h"
+#include "../Rendering/RenderContext.h"
+#include "../Config.h"
 
-
-UniformBuffer::UniformBuffer(Device& device, CommandPool& commandPool, DescriptorPool& pool,VkDescriptorSetLayout globalLayout, uint32_t maxFramesInFlight)
+UniformBuffer::UniformBuffer(Device& device, CommandPool& commadPool, RenderContext& renderer)
     : m_Device(device)
-    , m_CommandPool(commandPool)
-	, m_MaxFramesInFlight(maxFramesInFlight)
+    , m_CommandPool(commadPool)
     , m_UniformBuffers()
 	, m_UniformBuffersMapped()
 	, m_DescriptorSets()
 {
     CreateUniformBuffers();
-    m_DescriptorSets = pool.AllocateSets(globalLayout);
+    m_DescriptorSets = renderer.GetDescriptorPool().AllocateSets(renderer.GetPipeline().GetGlobalSetLayout());
     WriteDescriptorSets();
 }
 
@@ -22,10 +20,10 @@ void UniformBuffer::CreateUniformBuffers()
 {
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
-    m_UniformBuffers.reserve(m_MaxFramesInFlight);
-    m_UniformBuffersMapped.resize(m_MaxFramesInFlight);
+    m_UniformBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
+    m_UniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
-    for (size_t i = 0; i < m_MaxFramesInFlight; i++) {
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         m_UniformBuffers.emplace_back(m_Device, m_CommandPool, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
         vkMapMemory(m_Device.GetDevice(), m_UniformBuffers[i].GetMemory(), 0, bufferSize, 0, &m_UniformBuffersMapped[i]);
@@ -34,7 +32,7 @@ void UniformBuffer::CreateUniformBuffers()
 
 void UniformBuffer::WriteDescriptorSets()
 {
-    for (size_t i = 0; i < m_MaxFramesInFlight; i++)
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         VkDescriptorBufferInfo bufferInfo{};
         bufferInfo.buffer = m_UniformBuffers[i].GetBuffer();
@@ -57,6 +55,7 @@ void UniformBuffer::Update(uint32_t frameIndex, const UniformBufferObject& ubo)
 {
     memcpy(m_UniformBuffersMapped[frameIndex], &ubo, sizeof(ubo));
 }
+
 
 void UniformBuffer::Bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout, uint32_t frameIndex) const
 {

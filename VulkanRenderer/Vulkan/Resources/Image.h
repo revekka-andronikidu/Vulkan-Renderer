@@ -24,17 +24,13 @@ public:
 	Image& operator=(Image&& other) noexcept;
 
 
-
-
 	void GenerateMipmaps(CommandPool& commandPool);
 	void TransitionImageLayout(CommandPool& commandPool, VkPipelineStageFlags sourceStage, VkPipelineStageFlags destinationStage, VkAccessFlags sourceAccessMask, VkAccessFlags destinationAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout);
 	void CopyBufferToImage(CommandPool& commandPool, VkBuffer buffer);
 	void CreateImageView();
 
 private:
-
-	VkDevice m_Device;
-	VkPhysicalDevice m_PhysicalDevice;
+	Device& m_Device;
 	uint32_t m_TextWidth;
 	uint16_t m_TextHeight;
 	void CreateImage(uint32_t width, uint32_t height, VkSampleCountFlagBits samples, VkImageTiling tiling, VkImageUsageFlags usage);

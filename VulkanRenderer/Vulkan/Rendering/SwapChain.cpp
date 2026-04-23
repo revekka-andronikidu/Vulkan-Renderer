@@ -1,28 +1,22 @@
 #include "SwapChain.h"
-#include "VulkanContext/Device.h"
-#include "ResourcesUtils.h"
-#include "../Window.h"
-
+#include "../Core/Device.h"
+#include "../../Window.h"
+#include "../Resources/Image.h"
 #include <stdexcept>
 #include <algorithm>
 #include <GLFW/glfw3.h>
-#include "Resources/Image.h"
-#include "CommandPool.h"
+#include <array>
 
-SwapChain::SwapChain(Window& window, VkSurfaceKHR surface, Device& device, CommandPool& commandPool)
+SwapChain::SwapChain(Window& window, VkSurfaceKHR surface, Device& device)
 	: m_Window(window)
     , m_Device(device)
     , m_Surface(surface)
 	, m_SwapChain(VK_NULL_HANDLE)
 	, m_SwapChainExtent({ 0, 0 })
     , m_SwapChainImages{}
-	, m_CommandPool(commandPool)
 { 
 	CreateSwapChain();
     CreateImageViews(); 
-
-    CreateDepthResources();
-   // CreateFramebuffers();
 }
 
 SwapChain::~SwapChain()
@@ -107,7 +101,7 @@ VkSurfaceFormatKHR SwapChain::ChooseSwapSurfaceFormat(const std::vector<VkSurfac
     return availableFormats[0];
 }
 
-void SwapChain::RecreateSwapChain(VkRenderPass renderPass) 
+void SwapChain::RecreateSwapChain(VkRenderPass renderPass, CommandPool& commandPool) 
 {
     int width = 0, height = 0;
     glfwGetFramebufferSize(m_Window.GetWindow(), &width, &height);
@@ -123,7 +117,7 @@ void SwapChain::RecreateSwapChain(VkRenderPass renderPass)
     CreateImageViews();
 
 
-    CreateDepthResources();
+    CreateDepthResources(commandPool);
     CreateFramebuffers(renderPass);
 }
 
@@ -184,13 +178,13 @@ VkFormat SwapChain::GetSwapChainImageFormat() const
     return m_SwapChainImages.empty() ? VK_FORMAT_UNDEFINED : m_SwapChainImages[0].m_Format;
 }
 
-void SwapChain::CreateDepthResources()
+void SwapChain::CreateDepthResources(CommandPool& commandPool)
 {
     VkFormat depthFormat = m_Device.FindDepthFormat();
 
     m_DepthImage = std::make_unique<Image>(m_Device, m_SwapChainExtent.width, m_SwapChainExtent.height, 1, VK_SAMPLE_COUNT_1_BIT, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
 
-    m_DepthImage->TransitionImageLayout(m_CommandPool, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    m_DepthImage->TransitionImageLayout(commandPool, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 }
 
 void SwapChain::CreateFramebuffers(VkRenderPass renderPass)
@@ -243,3 +237,4 @@ void SwapChain::EndRenderPass(VkCommandBuffer cmd)
 {
     vkCmdEndRenderPass(cmd);
 }
+

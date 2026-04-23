@@ -52,6 +52,7 @@ public:
     QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice physicalDevice);
     SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice physicalDevice);
     VkFormat FindDepthFormat();
+    uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 private:
     VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);

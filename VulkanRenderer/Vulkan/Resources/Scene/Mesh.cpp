@@ -3,10 +3,8 @@
 #define TINYOBJLOADER_DISABLE_FAST_FLOAT
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
-#include "../ResourcesUtils.h"
 #include <iostream>
-
-#include "Buffer.h"
+#include "../Buffer.h"
 
 
 Mesh::Mesh(Device& device, CommandPool& commandPool, const std::string& path)

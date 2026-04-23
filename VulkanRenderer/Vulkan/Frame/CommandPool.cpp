@@ -1,6 +1,7 @@
 #include "CommandPool.h"
-#include "VulkanContext/Device.h"
-#include "ResourcesUtils.h"
+#include "../Core/Device.h"
+#include "../Config.h"
+
 
 CommandPool::CommandPool(Device& device)
     : m_Device(device)

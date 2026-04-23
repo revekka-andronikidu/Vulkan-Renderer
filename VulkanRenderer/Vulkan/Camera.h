@@ -1,6 +1,6 @@
 #pragma once
 #include <chrono>
-#include "UniformBuffer.h"
+#include "Frame/UniformBuffer.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 class Camera

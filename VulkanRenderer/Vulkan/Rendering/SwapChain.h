@@ -10,7 +10,7 @@ class CommandPool;
 class SwapChain final
 {
 public:
-	SwapChain(Window& window, VkSurfaceKHR surface, Device& device, CommandPool& commandPool);
+	SwapChain(Window& window, VkSurfaceKHR surface, Device& device);
 	~SwapChain();
 
 	SwapChain(const SwapChain&) = delete;
@@ -21,7 +21,7 @@ public:
 
 	VkSwapchainKHR GetHandle() const { return m_SwapChain; }
 	const std::vector<Image>& GetSwapChainImages() const;
-	void RecreateSwapChain(VkRenderPass renderPass);
+	void RecreateSwapChain(VkRenderPass renderPass, CommandPool& commandPool);
 	VkExtent2D GetExtent() const { return m_SwapChainExtent; }
 	std::vector<VkFramebuffer> GetSwapChainFramebuffers() const { return m_SwapChainFramebuffers; }
 	VkFormat GetSwapChainImageFormat() const;
@@ -29,8 +29,11 @@ public:
 	void BeginRenderPass(VkCommandBuffer commandBuffer, VkRenderPass renderPass, uint32_t imageIndex);
 	void EndRenderPass(VkCommandBuffer commandBuffer);
 
-	void CreateFramebuffers(VkRenderPass renderPass);
-
+	void Init(CommandPool& commandPool, VkRenderPass renderPass)
+	{
+		CreateDepthResources(commandPool);
+		CreateFramebuffers(renderPass);
+	}
 
 private:
 	Device& m_Device;
@@ -40,8 +43,6 @@ private:
 	std::unique_ptr<Image> m_DepthImage;
 	std::vector<Image> m_SwapChainImages;
 	std::vector<VkFramebuffer> m_SwapChainFramebuffers;
-	CommandPool& m_CommandPool;
-
 	VkExtent2D m_SwapChainExtent;
 
 	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
@@ -49,6 +50,8 @@ private:
 	void CleanupSwapChain();
 	VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 	VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-	void CreateDepthResources();
+	void CreateDepthResources(CommandPool& commandPool);
+	void CreateFramebuffers(VkRenderPass renderPass);
 	void CreateImageViews();
+
 };

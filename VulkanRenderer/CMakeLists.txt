@@ -26,16 +26,19 @@ find_package(Vulkan REQUIRED)
 
 add_executable(${TARGET_NAME} 
 main.cpp
-VulkanRenderer.cpp
-Vulkan/SwapChain.cpp
-Vulkan/CommandPool.cpp
-Vulkan/Pipeline.cpp
+Vulkan/VulkanRenderer.cpp
+Vulkan/Core/Device.cpp
+Vulkan/Rendering/SwapChain.cpp
+Vulkan/Rendering/Pipeline.cpp
+Vulkan/Frame/UniformBuffer.cpp
+Vulkan/Frame/CommandPool.cpp
 Vulkan/Resources/Buffer.cpp
 Vulkan/Resources/Image.cpp
 Vulkan/Resources/ResourceManager.cpp
-Vulkan/Resources/Mesh.cpp
-Vulkan/Resources/Material.cpp
-Vulkan/Resources/DescriptorPool.cpp "Vulkan/UniformBuffer.cpp" "Vulkan/VulkanContext/Device.cpp")
+Vulkan/Resources/Scene/Mesh.cpp
+Vulkan/Resources/Scene/Material.cpp
+"Vulkan/Rendering/DescriptorPool.cpp" 
+)
 
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 

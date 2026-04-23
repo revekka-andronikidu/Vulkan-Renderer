@@ -2,14 +2,12 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <string>
-#include<memory>
-
+#include <memory>
+#include "../Vertex.h"
 
 class CommandPool;
 class Buffer;
 class Device;
-struct Vertex;
-
 class Mesh final
 {
 public:

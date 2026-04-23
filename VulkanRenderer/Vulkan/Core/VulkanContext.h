@@ -9,9 +9,8 @@ class VulkanContext final
 {
 public:
 	VulkanContext(Window& window)
-		: m_WindowRef(window)
-		, m_Instance()
-		, m_Surface(m_Instance.GetInstance(), m_WindowRef)
+		: m_Instance()
+		, m_Surface(m_Instance.GetInstance(), window)
 		, m_Device(m_Surface.GetSurface(), m_Instance)
 	{
 	}
@@ -29,7 +28,6 @@ public:
 	VulkanContext& operator=(VulkanContext&&) = delete;
 
 private:
-	Window& m_WindowRef;
 	VulkanInstance m_Instance;
 	Surface m_Surface;
 	Device m_Device; 

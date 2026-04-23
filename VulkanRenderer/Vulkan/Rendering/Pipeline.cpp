@@ -1,7 +1,9 @@
 #include "Pipeline.h"
-#include "VulkanContext/Device.h"
-#include "ResourcesUtils.h"
+#include "../Core/Device.h"
 #include <array>
+#include "../Resources/Vertex.h"
+#include "../Resources/ResourcesUtils.h"
+#include "../Resources/ResourcesUtils.h"
 
 
 Pipeline::Pipeline(Device& device, VkFormat swapChainImageFormat, VkRenderPass renderPass)

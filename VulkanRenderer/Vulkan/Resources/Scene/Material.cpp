@@ -1,13 +1,11 @@
 #include "Material.h"
-#include "Buffer.h"
-#include "Image.h"
 #include <cmath>
-#include <stdexcept>
-#include "DescriptorPool.h"
-#include "../CommandPool.h"
 #include <array>
-#include "../ResourcesUtils.h"
-
+#include <stdexcept>
+#include "../Buffer.h"
+#include "../Image.h"
+#include "../../Rendering/DescriptorPool.h"
+#include "../../Frame/CommandPool.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -27,12 +25,10 @@ Material::Material(Device& device, CommandPool& commandPool, DescriptorPool& poo
 
 Material::~Material()
 {
-
 }
 
 void Material::Bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout, uint32_t frameIndex) const
 {
-
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 1, 1, &m_DescriptorSets[frameIndex], 0, nullptr);
 }
 

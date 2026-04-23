@@ -1,13 +1,14 @@
 #pragma once
 #include "TextureSampler.h"
-#include "../ResourcesUtils.h"
-#include "DescriptorPool.h"
-#include "Model.h"  
+#include "../Rendering/DescriptorPool.h"
+#include "Scene/Model.h"  
 
 class Image;
 class Device;
 class SwapChain;
 class CommandPool;
+class FrameContext;
+class RenderContext;
 class ResourceManager final
 {
 private:
@@ -15,7 +16,7 @@ private:
 	const std::string MODEL_PATH = "resources/models/viking_room.obj";
 
 public:
-	ResourceManager(Device& device, CommandPool& commandPool, DescriptorPool& descriptorPool, VkDescriptorSetLayout descriptorSetLayout);
+	ResourceManager(Device& device, RenderContext& renderContext, FrameContext& frameContext);
 	~ResourceManager() = default;
 	void DrawAll(VkCommandBuffer cmd, VkPipelineLayout pipelineLayout, uint32_t frameIndex) const;
 	

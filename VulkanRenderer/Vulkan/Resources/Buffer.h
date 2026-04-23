@@ -22,8 +22,7 @@ public:
 	Buffer& operator=(Buffer&& other) = delete;
 
 protected:
-	VkDevice m_Device;
-	VkPhysicalDevice m_PhysicalDevice;
+	Device& m_Device;
 	VkBuffer m_Buffer;
 	VkDeviceMemory m_BufferMemory;
 	CommandPool& m_CommandPool;

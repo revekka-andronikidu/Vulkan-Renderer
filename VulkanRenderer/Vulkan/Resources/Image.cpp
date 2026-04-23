@@ -1,12 +1,11 @@
 #include "Image.h"
 #include <stdexcept>
-#include "../VulkanContext/Device.h"
-#include "../ResourcesUtils.h"
-#include "../CommandPool.h"
+#include "../Core/Device.h"
+
+#include "../Frame/CommandPool.h"
 
 Image::Image(Device& device, uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits samples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageAspectFlags aspectMask)
-	: m_Device(device.GetDevice())
-	, m_PhysicalDevice(device.GetPhysicalDevice())
+	: m_Device(device)
 	, m_Image(VK_NULL_HANDLE)
 	, m_Memory(VK_NULL_HANDLE)
 	, m_ImageView(VK_NULL_HANDLE)
@@ -22,8 +21,7 @@ Image::Image(Device& device, uint32_t width, uint32_t height, uint32_t mipLevels
 }
 
 Image::Image(Device& device, VkImage existingImage, VkFormat format, VkImageAspectFlags aspectMask)
-    : m_Device(device.GetDevice())
-    , m_PhysicalDevice(device.GetPhysicalDevice())
+    : m_Device(device)
     , m_Image(existingImage)
     , m_Memory(VK_NULL_HANDLE)
     , m_ImageView(VK_NULL_HANDLE)
@@ -42,17 +40,16 @@ Image::~Image()
 void Image::Cleanup()
 {
     
-        vkDestroyImageView(m_Device, m_ImageView, nullptr);
+        vkDestroyImageView(m_Device.GetDevice(), m_ImageView, nullptr);
 
     if (m_OwnsImage && m_Image != VK_NULL_HANDLE)
-        vkDestroyImage(m_Device, m_Image, nullptr);
+        vkDestroyImage(m_Device.GetDevice(), m_Image, nullptr);
     if (m_OwnsImage && m_Memory != VK_NULL_HANDLE)
-        vkFreeMemory(m_Device, m_Memory, nullptr);
+        vkFreeMemory(m_Device.GetDevice(), m_Memory, nullptr);
 }
 
 Image::Image(Image&& other) noexcept
     : m_Device(other.m_Device)
-    , m_PhysicalDevice(other.m_PhysicalDevice)
     , m_Image(other.m_Image)
     , m_Memory(other.m_Memory)
     , m_ImageView(other.m_ImageView)
@@ -105,29 +102,29 @@ void Image::CreateImage(uint32_t width, uint32_t height, VkSampleCountFlagBits s
     imageInfo.samples = samples;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateImage(m_Device, &imageInfo, nullptr, &m_Image) != VK_SUCCESS) {
+    if (vkCreateImage(m_Device.GetDevice(), &imageInfo, nullptr, &m_Image) != VK_SUCCESS) {
         throw std::runtime_error("failed to create image!");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(m_Device, m_Image, &memRequirements);
+    vkGetImageMemoryRequirements(m_Device.GetDevice(), m_Image, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = FindMemoryType(m_PhysicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    allocInfo.memoryTypeIndex = m_Device.FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &m_Memory) != VK_SUCCESS) {
+    if (vkAllocateMemory(m_Device.GetDevice(), &allocInfo, nullptr, &m_Memory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate image memory!");
     }
 
-    vkBindImageMemory(m_Device, m_Image, m_Memory, 0);
+    vkBindImageMemory(m_Device.GetDevice(), m_Image, m_Memory, 0);
 }
 
 void Image::CreateImageView()
 {
     if(m_ImageView)
-		vkDestroyImageView(m_Device, m_ImageView, nullptr);
+		vkDestroyImageView(m_Device.GetDevice(), m_ImageView, nullptr);
 
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -144,7 +141,7 @@ void Image::CreateImageView()
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    if (vkCreateImageView(m_Device, &viewInfo, nullptr, &m_ImageView) != VK_SUCCESS) {
+    if (vkCreateImageView(m_Device.GetDevice(), &viewInfo, nullptr, &m_ImageView) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture image view!");
     }
 }
@@ -153,7 +150,7 @@ void Image::GenerateMipmaps(CommandPool& commandPool)
 {
     // Check if image format supports linear blitting
     VkFormatProperties formatProperties;
-    vkGetPhysicalDeviceFormatProperties(m_PhysicalDevice, m_Format, &formatProperties);
+    vkGetPhysicalDeviceFormatProperties(m_Device.GetPhysicalDevice(), m_Format, &formatProperties);
 
     if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
         throw std::runtime_error("texture image format does not support linear blitting!");

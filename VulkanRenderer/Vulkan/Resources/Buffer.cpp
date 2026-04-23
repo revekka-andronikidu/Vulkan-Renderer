@@ -1,22 +1,19 @@
 #include "Buffer.h"
 #include <stdexcept>
-#include "../VulkanContext/Device.h"
-#include "../ResourcesUtils.h"
-#include "../CommandPool.h"
+#include "../Core/Device.h"
+#include "../Frame/CommandPool.h"
 
 Buffer::Buffer(Device& device, CommandPool& commandPool, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
-    : m_Device(device.GetDevice())
-    , m_PhysicalDevice(device.GetPhysicalDevice())
+    : m_Device(device)
     , m_CommandPool(commandPool)
-
 {
     CreateBuffer(size, usage, properties);
 }
 
 Buffer::~Buffer()
 {
-    vkDestroyBuffer(m_Device, m_Buffer, nullptr);
-    vkFreeMemory(m_Device, m_BufferMemory, nullptr);
+    vkDestroyBuffer(m_Device.GetDevice(), m_Buffer, nullptr);
+    vkFreeMemory(m_Device.GetDevice(), m_BufferMemory, nullptr);
 }
 
 void Buffer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties) 
@@ -27,23 +24,23 @@ void Buffer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
     bufferInfo.usage = usage;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateBuffer(m_Device, &bufferInfo, nullptr, &m_Buffer) != VK_SUCCESS) {
+    if (vkCreateBuffer(m_Device.GetDevice(), &bufferInfo, nullptr, &m_Buffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to create buffer!");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(m_Device, m_Buffer, &memRequirements);
+    vkGetBufferMemoryRequirements(m_Device.GetDevice(), m_Buffer, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = FindMemoryType(m_PhysicalDevice, memRequirements.memoryTypeBits, properties);
+    allocInfo.memoryTypeIndex = m_Device.FindMemoryType(memRequirements.memoryTypeBits, properties);
 
-    if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &m_BufferMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(m_Device.GetDevice(), &allocInfo, nullptr, &m_BufferMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate buffer memory!");
     }
 
-    vkBindBufferMemory(m_Device, m_Buffer, m_BufferMemory, 0);
+    vkBindBufferMemory(m_Device.GetDevice(), m_Buffer, m_BufferMemory, 0);
 }
 
 void Buffer::CopyBuffer(VkBuffer srcBuffer, VkDeviceSize size) const
@@ -61,7 +58,7 @@ void Buffer::Upload(const void* srcData, VkDeviceSize size)
 {
     void* data = nullptr;
 
-    vkMapMemory(m_Device, m_BufferMemory, 0, size, 0, &data);
+    vkMapMemory(m_Device.GetDevice(), m_BufferMemory, 0, size, 0, &data);
     memcpy(data, srcData, (size_t)size);
-    vkUnmapMemory(m_Device, m_BufferMemory);
+    vkUnmapMemory(m_Device.GetDevice(), m_BufferMemory);
 }

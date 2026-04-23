@@ -1,11 +1,14 @@
 #pragma once
 #include <vulkan/vulkan.h>
-
+#include "../Config.h"
+#include <vector>
+#include <stdexcept>
+    
 class Device;
 class SyncObjects
 {
 public:
-    SyncObjects(Device& device)
+    SyncObjects(VkDevice device)
         : m_Device(device)
     {
 		CreateSyncObjects();
@@ -14,20 +17,20 @@ public:
     ~SyncObjects()
     {
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            vkDestroySemaphore(m_Device.GetDevice(), m_RenderFinishedSemaphores[i], nullptr);
-            vkDestroySemaphore(m_Device.GetDevice(), m_ImageAvailableSemaphores[i], nullptr);
-            vkDestroyFence(m_Device.GetDevice(), m_InFlightFences[i], nullptr);
+            vkDestroySemaphore(m_Device, m_RenderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(m_Device, m_ImageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(m_Device, m_InFlightFences[i], nullptr);
         }
     }
 
     void WaitForFence(uint32_t frameIndex)
     {
-        vkWaitForFences(m_Device.GetDevice(), 1, &m_InFlightFences[frameIndex], VK_TRUE, UINT64_MAX);
+        vkWaitForFences(m_Device, 1, &m_InFlightFences[frameIndex], VK_TRUE, UINT64_MAX);
     }
 
     void ResetFence(uint32_t frameIndex)
     {
-        vkResetFences(m_Device.GetDevice(), 1, &m_InFlightFences[frameIndex]);
+        vkResetFences(m_Device, 1, &m_InFlightFences[frameIndex]);
     }
 
     VkSemaphore GetImageAvailableSemaphore(uint32_t frameIndex) const { return m_ImageAvailableSemaphores[frameIndex]; }
@@ -35,7 +38,7 @@ public:
     VkFence     GetInFlightFence(uint32_t frameIndex)           const { return m_InFlightFences[frameIndex]; }
 
 private:
-    Device& m_Device;
+    VkDevice m_Device;
     std::vector<VkSemaphore> m_ImageAvailableSemaphores;
     std::vector<VkSemaphore> m_RenderFinishedSemaphores;
     std::vector<VkFence>     m_InFlightFences;
@@ -54,9 +57,9 @@ private:
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            if (vkCreateSemaphore(m_Device.GetDevice(), &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]) != VK_SUCCESS ||
-                vkCreateSemaphore(m_Device.GetDevice(), &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) != VK_SUCCESS ||
-                vkCreateFence(m_Device.GetDevice(), &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS)
+            if (vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]) != VK_SUCCESS ||
+                vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) != VK_SUCCESS ||
+                vkCreateFence(m_Device, &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS)
                 throw std::runtime_error("failed to create sync objects!");
         }
 	}

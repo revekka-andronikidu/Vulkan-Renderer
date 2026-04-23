@@ -1,6 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.h>
-#include "VulkanContext/Device.h"
+#include "../Core/Device.h"
 
 class Device;
 class FrameSubmitter final

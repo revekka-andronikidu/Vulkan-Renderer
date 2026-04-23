@@ -2,8 +2,9 @@
 #include <glm/glm.hpp>
 #include <vulkan/vulkan.h>
 #include <vector>
-#include "Resources/Buffer.h"
+#include "../Resources/Buffer.h"
 
+class RenderContext;
 struct UniformBufferObject
 {
     alignas(16) glm::mat4 model;
@@ -17,7 +18,7 @@ class DescriptorPool;
 class UniformBuffer final
 {
 public:
-    UniformBuffer(Device& device, CommandPool& commandPool, DescriptorPool& pool, VkDescriptorSetLayout globalLayout, uint32_t maxFramesInFlight);
+    UniformBuffer(Device& device, CommandPool& commadPool, RenderContext& renderer);
     ~UniformBuffer() = default;
 
     UniformBuffer(const UniformBuffer&) = delete;
