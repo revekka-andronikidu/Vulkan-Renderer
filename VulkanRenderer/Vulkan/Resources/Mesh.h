@@ -28,7 +28,6 @@ public:
 	void Draw(VkCommandBuffer commandBuffer) const;
 
 	
-
 private:
 	Device& m_Device;
 	CommandPool& m_CommandPool;

@@ -1,6 +1,6 @@
 #include "Buffer.h"
 #include <stdexcept>
-#include "../Device.h"
+#include "../VulkanContext/Device.h"
 #include "../ResourcesUtils.h"
 #include "../CommandPool.h"
 

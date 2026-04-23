@@ -1,5 +1,5 @@
 #include "DescriptorPool.h"
-#include "../Device.h"
+#include "../VulkanContext/Device.h"
 #include <array>
 
 DescriptorPool::DescriptorPool(Device& device, uint32_t maxFramesInFlight)

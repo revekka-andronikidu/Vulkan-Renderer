@@ -1,5 +1,5 @@
 #include "Window.h"
-#include "Vulkan/Device.h"
+#include "Vulkan/VulkanContext/VulkanContext.h"
 #include "Vulkan/Swapchain.h"
 #include "Vulkan/ResourcesUtils.h"
 #include "Vulkan/Pipeline.h"
@@ -24,11 +24,9 @@ public:
 	~VulkanRenderer();
 
     void Run();
-
 private:
     Window m_Window;
     VulkanContext m_Context;
-	Device m_Device; //move to context?
     CommandPool m_CommandPool;
 	SwapChain m_SwapChain;
 	DescriptorPool m_DescriptorPool;

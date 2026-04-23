@@ -1,23 +1,26 @@
 #pragma once
 #include "VulkanInstance.h"
+#include "Device.h"
+#include "Surface.h"
 #include "../../Window.h"
+
 
 class VulkanContext final
 {
 public:
 	VulkanContext(Window& window)
-		: window(window), instance(), surface(VK_NULL_HANDLE)	
+		: m_WindowRef(window)
+		, m_Instance()
+		, m_Surface(m_Instance.GetInstance(), m_WindowRef)
+		, m_Device(m_Surface.GetSurface(), m_Instance)
 	{
-		CreateSurface();
 	}
 
-	~VulkanContext()
-	{
-		vkDestroySurfaceKHR(instance.GetInstance(), surface, nullptr);
-	}
+	~VulkanContext() = default;
 
-	VulkanInstance& GetInstance() { return instance; }
-	VkSurfaceKHR& GetSurface() { return surface; }
+	VulkanInstance& GetInstance() { return m_Instance; }
+	Device& GetDevice() { return m_Device; }
+	VkSurfaceKHR GetSurface() { return m_Surface.GetSurface(); }
 
 
 	VulkanContext(const VulkanContext&) = delete;
@@ -26,16 +29,10 @@ public:
 	VulkanContext& operator=(VulkanContext&&) = delete;
 
 private:
-	VulkanInstance instance;
-	VkSurfaceKHR surface;
+	Window& m_WindowRef;
+	VulkanInstance m_Instance;
+	Surface m_Surface;
+	Device m_Device; 
 
-	Window& window;
-
-	void CreateSurface()
-	{
-		if (glfwCreateWindowSurface(instance.GetInstance(), window.GetWindow(), nullptr, &surface) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create window surface!");
-		}
-	}
-
+	
 };

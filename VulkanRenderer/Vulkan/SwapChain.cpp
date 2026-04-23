@@ -1,5 +1,5 @@
 #include "SwapChain.h"
-#include "Device.h"
+#include "VulkanContext/Device.h"
 #include "ResourcesUtils.h"
 #include "../Window.h"
 
@@ -31,7 +31,7 @@ SwapChain::~SwapChain()
 }
 void SwapChain::CreateSwapChain()
 {
-    Device::SwapChainSupportDetails swapChainSupport = m_Device.querySwapChainSupport(m_Device.GetPhysicalDevice());
+    Device::SwapChainSupportDetails swapChainSupport = m_Device.QuerySwapChainSupport(m_Device.GetPhysicalDevice());
 
     VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes);

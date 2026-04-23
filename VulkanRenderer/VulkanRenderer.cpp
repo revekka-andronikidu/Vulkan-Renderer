@@ -3,16 +3,15 @@
 VulkanRenderer::VulkanRenderer()
 	: m_Window()
 	, m_Context(m_Window)
-	, m_Device(m_Context)
-	, m_CommandPool(m_Device)
-	, m_SwapChain(m_Window, m_Context.GetSurface(), m_Device, m_CommandPool)
-	, m_RenderPass(m_Device.GetDevice(), m_SwapChain.GetSwapChainImageFormat(), m_Device.FindDepthFormat())
-	, m_Pipeline(m_Device, m_SwapChain.GetSwapChainImageFormat(), m_RenderPass.GetRenderPass())
-	, m_DescriptorPool(m_Device, static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT))
-	, m_UniformBuffer(m_Device, m_CommandPool, m_DescriptorPool, m_Pipeline.GetGlobalSetLayout(),  static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT))
-	, m_SyncObjects(m_Device)
-	, m_Submitter(m_Device)
-	, m_ResourceManager(m_Device, m_CommandPool, m_DescriptorPool, m_Pipeline.GetMaterialSetLayout())
+	, m_CommandPool(m_Context.GetDevice())
+	, m_SwapChain(m_Window, m_Context.GetSurface(), m_Context.GetDevice(), m_CommandPool)
+	, m_RenderPass(m_Context.GetDevice().GetDevice(), m_SwapChain.GetSwapChainImageFormat(), m_Context.GetDevice().FindDepthFormat())
+	, m_Pipeline(m_Context.GetDevice(), m_SwapChain.GetSwapChainImageFormat(), m_RenderPass.GetRenderPass())
+	, m_DescriptorPool(m_Context.GetDevice(), static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT))
+	, m_UniformBuffer(m_Context.GetDevice(), m_CommandPool, m_DescriptorPool, m_Pipeline.GetGlobalSetLayout(),  static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT))
+	, m_SyncObjects(m_Context.GetDevice())
+	, m_Submitter(m_Context.GetDevice())
+	, m_ResourceManager(m_Context.GetDevice(), m_CommandPool, m_DescriptorPool, m_Pipeline.GetMaterialSetLayout())
 
 {
 	m_SwapChain.CreateFramebuffers(m_RenderPass.GetRenderPass());
@@ -29,7 +28,7 @@ void VulkanRenderer::Run()
 		glfwPollEvents();
 		DrawFrame();
 	}
-	vkDeviceWaitIdle(m_Device.GetDevice());
+	vkDeviceWaitIdle(m_Context.GetDevice().GetDevice());
 }
 
 void VulkanRenderer::DrawFrame()

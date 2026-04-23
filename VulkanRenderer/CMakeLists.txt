@@ -35,7 +35,7 @@ Vulkan/Resources/Image.cpp
 Vulkan/Resources/ResourceManager.cpp
 Vulkan/Resources/Mesh.cpp
 Vulkan/Resources/Material.cpp
-Vulkan/Resources/DescriptorPool.cpp "Vulkan/UniformBuffer.cpp")
+Vulkan/Resources/DescriptorPool.cpp "Vulkan/UniformBuffer.cpp" "Vulkan/VulkanContext/Device.cpp")
 
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
