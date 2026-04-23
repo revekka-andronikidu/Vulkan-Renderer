@@ -141,11 +141,6 @@ void SwapChain::CleanupSwapChain() {
         vkDestroyFramebuffer(m_Device.GetDevice(), framebuffer, nullptr);
     }
 
-    /*for (auto& imageView : m_SwapChainImages) 
-    {
-        vkDestroyImageView(m_Device.GetDevice(), imageView.m_ImageView, nullptr);
-    }*/
-
     vkDestroySwapchainKHR(m_Device.GetDevice(), m_SwapChain, nullptr);
 }
 

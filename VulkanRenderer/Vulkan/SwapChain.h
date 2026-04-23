@@ -42,8 +42,6 @@ private:
 	std::vector<VkFramebuffer> m_SwapChainFramebuffers;
 	CommandPool& m_CommandPool;
 
-	/*std::vector<VkImageView> imageViews;
-	VkFormat imageFormat;*/
 	VkExtent2D m_SwapChainExtent;
 
 	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);

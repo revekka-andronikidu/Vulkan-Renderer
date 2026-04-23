@@ -41,7 +41,7 @@ Image::~Image()
 }
 void Image::Cleanup()
 {
-    if (m_ImageView != VK_NULL_HANDLE)
+    
         vkDestroyImageView(m_Device, m_ImageView, nullptr);
 
     if (m_OwnsImage && m_Image != VK_NULL_HANDLE)
@@ -72,15 +72,17 @@ Image& Image::operator=(Image&& other) noexcept
 {
     if (this != &other)
     {
-       Cleanup();
+        Cleanup();
 
         m_Image = other.m_Image;
         m_Memory = other.m_Memory;
         m_ImageView = other.m_ImageView;
+        m_OwnsImage = other.m_OwnsImage;
 
         other.m_Image = VK_NULL_HANDLE;
         other.m_Memory = VK_NULL_HANDLE;
         other.m_ImageView = VK_NULL_HANDLE;
+        other.m_OwnsImage = false;
     }
     return *this;
 }
@@ -124,6 +126,9 @@ void Image::CreateImage(uint32_t width, uint32_t height, VkSampleCountFlagBits s
 
 void Image::CreateImageView()
 {
+    if(m_ImageView)
+		vkDestroyImageView(m_Device, m_ImageView, nullptr);
+
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = m_Image;
