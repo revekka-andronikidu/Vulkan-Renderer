@@ -27,6 +27,7 @@ private:
     Camera m_Camera;
 
     uint32_t m_CurrentFrame = 0;
+    float    m_LastFrameTime = 0.0f;
    
     void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	void DrawFrame();   

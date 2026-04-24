@@ -9,6 +9,20 @@ VulkanRenderer::VulkanRenderer()
 
 {
 	m_RenderContext.InitializeSwapChain(m_FrameContext.GetCommandPool());
+
+	glfwSetWindowUserPointer(m_Window.GetWindow(), this);
+	glfwSetCursorPosCallback(m_Window.GetWindow(),
+		[](GLFWwindow* w, double x, double y) {
+			auto* renderer = static_cast<VulkanRenderer*>(glfwGetWindowUserPointer(w));
+			renderer->m_Camera.ProcessMouseMovement(
+				static_cast<float>(x), static_cast<float>(y));
+		});
+
+	glfwSetScrollCallback(m_Window.GetWindow(),
+		[](GLFWwindow* w, double, double y) {
+			auto* renderer = static_cast<VulkanRenderer*>(glfwGetWindowUserPointer(w));
+			renderer->m_Camera.ProcessMouseScroll(static_cast<float>(y));
+		});
 }
 
 VulkanRenderer::~VulkanRenderer()
@@ -19,7 +33,13 @@ void VulkanRenderer::Run()
 {
 	while (!m_Window.ShouldClose())
 	{
+		float currentTime = static_cast<float>(glfwGetTime());
+		float deltaTime = currentTime - m_LastFrameTime;
+		m_LastFrameTime = currentTime;
+
 		glfwPollEvents();
+		m_Camera.ProcessInput(m_Window.GetWindow(), deltaTime);
+
 		DrawFrame();
 	}
 	vkDeviceWaitIdle(m_VulkanContext.GetDevice().GetDevice());
