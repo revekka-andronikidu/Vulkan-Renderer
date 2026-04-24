@@ -20,7 +20,6 @@ public:
 private:
 	Device& m_Device;
 	VkDescriptorPool m_DescriptorPool;
-	std::vector<VkDescriptorSet> m_DescriptorSets;
 	void CreateDescriptorPool();
 
 

@@ -12,6 +12,7 @@ class Mesh final
 {
 public:
 	Mesh(Device& device, CommandPool& commandPool, const std::string& path);
+	Mesh(Device& device, CommandPool& commandPool, std::vector<Vertex> vertices, std::vector<uint32_t> indices);
 	~Mesh();
 
 	Mesh(const Mesh&) = delete;
@@ -36,7 +37,6 @@ private:
 	std::unique_ptr<Buffer> m_VertexBuffer;
 	std::unique_ptr<Buffer> m_IndexBuffer;
 
-	void LoadMesh();
 	void CreateVertexBuffer();
 	void CreateIndexBuffer();
 };

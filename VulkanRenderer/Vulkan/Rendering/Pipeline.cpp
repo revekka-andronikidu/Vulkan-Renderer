@@ -3,17 +3,22 @@
 #include <array>
 #include "../Resources/Vertex.h"
 #include "../Resources/ResourcesUtils.h"
-#include "../Resources/ResourcesUtils.h"
-
+#include "../Config.h"
 
 Pipeline::Pipeline(Device& device, VkFormat swapChainImageFormat, VkRenderPass renderPass)
     : m_Device(device)
 	, m_SwapChainImageFormat(swapChainImageFormat)
 	, m_RenderPass(renderPass)
+    , m_TextureCount(MAX_TEXTURE_ARRAY_SIZE)
 {
     
     CreateGlobalDescriptorSetLayout();
     CreateMaterialDescriptorSetLayout();
+    //CreateGraphicsPipeline();
+}
+
+void Pipeline::Build()
+{
     CreateGraphicsPipeline();
 }
 
@@ -29,7 +34,6 @@ Pipeline::~Pipeline()
 }
 void Pipeline::CreateGraphicsPipeline() 
 {
-
     auto vertShaderCode = ReadFile("resources/shaders/shader.vert.spv");
     auto fragShaderCode = ReadFile("resources/shaders/shader.frag.spv");
 
@@ -40,12 +44,26 @@ void Pipeline::CreateGraphicsPipeline()
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
     vertShaderStageInfo.module = vertShaderModule;
+
     vertShaderStageInfo.pName = "main";
+    uint32_t textureCount = m_TextureCount;
+
+    VkSpecializationMapEntry specEntry{};
+    specEntry.constantID = 0;       
+    specEntry.offset = 0;
+    specEntry.size = sizeof(uint32_t);
+
+    VkSpecializationInfo specInfo{};
+    specInfo.mapEntryCount = 1;
+    specInfo.pMapEntries = &specEntry;
+    specInfo.dataSize = sizeof(uint32_t);
+    specInfo.pData = &textureCount;
 
     VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
     fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
     fragShaderStageInfo.module = fragShaderModule;
+    fragShaderStageInfo.pSpecializationInfo = &specInfo;
     fragShaderStageInfo.pName = "main";
 
     VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
@@ -123,10 +141,17 @@ void Pipeline::CreateGraphicsPipeline()
         m_MaterialDescriptorSetLayout  // set = 1 (texture)
     };
 
+    VkPushConstantRange pushConstantRange{};
+    pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    pushConstantRange.offset = 0;
+    pushConstantRange.size = sizeof(uint32_t);
+
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(layouts.size());
     pipelineLayoutInfo.pSetLayouts = layouts.data();
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
 
     if (vkCreatePipelineLayout(m_Device.GetDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) {
@@ -191,18 +216,26 @@ VkShaderModule Pipeline::CreateShaderModule(const std::vector<char>& code)
 
 void Pipeline::CreateMaterialDescriptorSetLayout()
 {
-    VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-    samplerLayoutBinding.binding = 0;
-    samplerLayoutBinding.descriptorCount = 1;
-    samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    samplerLayoutBinding.pImmutableSamplers = nullptr;
-    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    VkDescriptorSetLayoutBinding samplerBinding{};
+    samplerBinding.binding = 0;
+    samplerBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+    samplerBinding.descriptorCount = 1;
+    samplerBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    VkDescriptorSetLayoutBinding textureArrayBinding{};
+    textureArrayBinding.binding = 1;
+    textureArrayBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+    textureArrayBinding.descriptorCount = m_TextureCount;  
+    textureArrayBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    std::array<VkDescriptorSetLayoutBinding, 2> texture = {
+        samplerBinding, textureArrayBinding
+    };
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 1;
-    layoutInfo.pBindings = &samplerLayoutBinding;
-
+    layoutInfo.bindingCount = static_cast<uint32_t>(texture.size());
+    layoutInfo.pBindings = texture.data();
     if (vkCreateDescriptorSetLayout(m_Device.GetDevice(), &layoutInfo, nullptr, &m_MaterialDescriptorSetLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor set layout!");
     }
@@ -210,6 +243,7 @@ void Pipeline::CreateMaterialDescriptorSetLayout()
 
 void Pipeline::CreateGlobalDescriptorSetLayout()
 {
+
     VkDescriptorSetLayoutBinding uboLayoutBinding{};
     uboLayoutBinding.binding = 0;
     uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -231,4 +265,14 @@ void Pipeline::CreateGlobalDescriptorSetLayout()
 void Pipeline::Bind(VkCommandBuffer commandBuffer) const
 {
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+}
+
+void Pipeline::PushTextureIndex(VkCommandBuffer cmd, uint32_t textureIndex) const
+{
+    vkCmdPushConstants(cmd, m_PipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(uint32_t), &textureIndex);
+}
+
+void Pipeline::SetTextureCount(uint32_t count)
+{
+    m_TextureCount = count;
 }

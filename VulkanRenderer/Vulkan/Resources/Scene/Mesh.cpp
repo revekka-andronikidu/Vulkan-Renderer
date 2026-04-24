@@ -1,10 +1,6 @@
 #include "Mesh.h"
-
-#define TINYOBJLOADER_DISABLE_FAST_FLOAT
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
-#include <iostream>
 #include "../Buffer.h"
+#include "MeshLoader.h"
 
 
 Mesh::Mesh(Device& device, CommandPool& commandPool, const std::string& path)
@@ -16,7 +12,23 @@ Mesh::Mesh(Device& device, CommandPool& commandPool, const std::string& path)
 	, m_Vertices({})
 	, m_Indices({})
 {
-    LoadMesh();
+    auto meshData = MeshLoader::Load(path);
+    m_Vertices = std::move(meshData[0].vertices);
+    m_Indices = std::move(meshData[0].indices);
+
+    CreateVertexBuffer();
+    CreateIndexBuffer();
+}
+
+Mesh::Mesh(Device& device, CommandPool& commandPool, std::vector<Vertex> vertices, std::vector<uint32_t> indices)
+    : m_Device(device)
+    , m_CommandPool(commandPool)
+    , m_Path("")
+    , m_VertexBuffer(nullptr)
+    , m_IndexBuffer(nullptr)
+    , m_Vertices(std::move(vertices))
+    , m_Indices(std::move(indices))
+{
     CreateVertexBuffer();
     CreateIndexBuffer();
 }
@@ -24,49 +36,6 @@ Mesh::Mesh(Device& device, CommandPool& commandPool, const std::string& path)
 Mesh::~Mesh()
 {
 }   
-
-void Mesh::LoadMesh()
-{
-    tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-    std::string err;
-    std::string war;
-
-    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &war, &err, m_Path.c_str()))
-    {
-        std::cerr << war << std::endl;
-        throw std::runtime_error(err);
-    }
-
-    std::unordered_map<Vertex, uint32_t> uniqueVertices{};
-
-    for (const auto& shape : shapes) {
-        for (const auto& index : shape.mesh.indices) {
-            Vertex vertex{};
-
-            vertex.pos = {
-                attrib.vertices[3 * index.vertex_index + 0],
-                attrib.vertices[3 * index.vertex_index + 1],
-                attrib.vertices[3 * index.vertex_index + 2]
-            };
-
-            vertex.texCoord = {
-                attrib.texcoords[2 * index.texcoord_index + 0],
-                1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
-            };
-
-            vertex.color = { 1.0f, 1.0f, 1.0f };
-
-            if (uniqueVertices.count(vertex) == 0) {
-                uniqueVertices[vertex] = static_cast<uint32_t>(m_Vertices.size());
-                m_Vertices.push_back(vertex);
-            }
-
-            m_Indices.push_back(uniqueVertices[vertex]);
-        }
-    }
-}
 
 void Mesh::CreateVertexBuffer()
 {

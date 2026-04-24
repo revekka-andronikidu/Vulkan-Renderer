@@ -18,6 +18,9 @@ public:
 	VkDescriptorSetLayout GetMaterialSetLayout() const { return m_MaterialDescriptorSetLayout; }
 	VkDescriptorSetLayout GetGlobalSetLayout() const { return m_GlobalDescriptorSetLayout; }
 	void Bind(VkCommandBuffer commandBuffer) const;
+	void SetTextureCount(uint32_t count);
+	void PushTextureIndex(VkCommandBuffer cmd, uint32_t textureIndex) const;
+	void Build();
 
 private:
 	Device& m_Device;
@@ -27,10 +30,12 @@ private:
 	VkDescriptorSetLayout m_GlobalDescriptorSetLayout;
 	VkFormat m_SwapChainImageFormat;
 	VkRenderPass m_RenderPass;
+	uint32_t m_TextureCount = 0;
 
 	void CreateGraphicsPipeline();
 	void CreateMaterialDescriptorSetLayout();
 	void CreateGlobalDescriptorSetLayout();
 	VkShaderModule CreateShaderModule(const std::vector<char>& code);
+	
 
 };

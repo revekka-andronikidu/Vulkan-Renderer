@@ -1,36 +1,17 @@
 #pragma once
-#include <vulkan/vulkan.h>
-#include <string>
-#include <memory>
-#include <vector>
+#include "TextureArray.h"
 
-class Device;
-class CommandPool;
-class Image;
-class DescriptorPool;
-class TextureSampler;
-class Material final
+class Material
 {
 public:
-    Material(Device& device, CommandPool& commandPool, DescriptorPool& pool, VkDescriptorSetLayout descriptorSetLayout, const std::string& texturePath, std::shared_ptr<TextureSampler> textureSampler);
-	~Material();
+    Material(TextureArray& textureArray, const std::string& texturePath)
+        : m_TextureIndex(textureArray.AddTexture(texturePath))
+    {
+    }
 
-	Material(const Material&) = delete;
-	Material& operator=(const Material&) = delete;
-	Material(Material&&) = delete;
-	Material& operator=(Material&&) = delete;
-
-    void Bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout, uint32_t frameIndex) const;
+    uint32_t GetTextureIndex() const { return m_TextureIndex; }
 
 private:
-	Device& m_Device;
-	CommandPool& m_CommandPool;
-	const std::string& m_TexturePath;
-    std::unique_ptr<Image> m_TextureImage;
-    std::vector<VkDescriptorSet> m_DescriptorSets;
-	std::shared_ptr<TextureSampler> m_TextureSampler;
-
-    void CreateTextureImage();
-	void WriteDescriptorSet();
+    uint32_t m_TextureIndex;  // index into the shared TextureArray
 };
 
