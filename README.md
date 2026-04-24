@@ -1,7 +1,8 @@
 # Vulkan Renderer
 
 **Name:** Revekka Andronikidu
-**Repository:** [VulkanRenderer]([https://github.com/yourusername/yourrepo](https://github.com/Howest-DAE-GD/gp2-vulkan-renderer-revekka-andronikidu))
+
+**Repository:** [https://github.com/Howest-DAE-GD/gp2-vulkan-renderer-revekka-andronikidu](https://github.com/Howest-DAE-GD/gp2-vulkan-renderer-revekka-andronikidu)
 
 ## Overview
 A Vulkan-based 3D renderer built in C++ as part of a Graphics Programming course.  
