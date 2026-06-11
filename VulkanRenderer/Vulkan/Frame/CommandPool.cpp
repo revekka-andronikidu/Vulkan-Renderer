@@ -51,18 +51,24 @@ VkCommandBuffer CommandPool::BeginSingleTimeCommands() const
 
     return commandBuffer;
 }
-
 void CommandPool::EndSingleTimeCommands(VkCommandBuffer commandBuffer) const
 {
     vkEndCommandBuffer(commandBuffer);
+
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+    VkFence fence;
+    vkCreateFence(m_Device.GetDevice(), &fenceInfo, nullptr, &fence);
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    vkQueueSubmit(m_Device.GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(m_Device.GetGraphicsQueue());
+    vkQueueSubmit(m_Device.GetGraphicsQueue(), 1, &submitInfo, fence);
+    vkWaitForFences(m_Device.GetDevice(), 1, &fence, VK_TRUE, UINT64_MAX);
+    vkDestroyFence(m_Device.GetDevice(), fence, nullptr);
 
     vkFreeCommandBuffers(m_Device.GetDevice(), m_CommandPool, 1, &commandBuffer);
 }

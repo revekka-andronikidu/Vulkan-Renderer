@@ -10,13 +10,13 @@ class Model final
 public:
 	Model(Device& device, CommandPool& commandPool, const std::string& modelPath, TextureArray& textureArray,  const std::string& texturePath)
 		: m_Mesh(device, commandPool, modelPath)
-		, m_Material(textureArray,texturePath)
+		, m_Material(Material::Create(textureArray,texturePath))
 	{
 	}
 
 	Model(Device& device, CommandPool& commandPool,const std::vector<Vertex>& vertices,const std::vector<uint32_t>& indices, TextureArray& textureArray, const std::string& texturePath)
 		: m_Mesh(device, commandPool, std::move(vertices), std::move(indices))
-		, m_Material(textureArray, texturePath)
+		, m_Material(Material::Create(textureArray, texturePath))
 	{
 	}
 
@@ -24,7 +24,7 @@ public:
 
 	void Draw(VkCommandBuffer commandBuffer, const Pipeline& pipeline, uint32_t frameIndex) const
 	{
-		pipeline.PushTextureIndex(commandBuffer, m_Material.GetTextureIndex());
+		pipeline.PushTextureIndex(commandBuffer, m_Material.textureIndex);
 
 		m_Mesh.Bind(commandBuffer);
 		m_Mesh.Draw(commandBuffer);

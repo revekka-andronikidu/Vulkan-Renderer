@@ -67,7 +67,7 @@ void VulkanRenderer::DrawFrame()
 
 void VulkanRenderer::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
-	m_FrameContext.BeginRecording(imageIndex);
+	m_FrameContext.BeginRecording(m_CurrentFrame);
 
 	m_RenderContext.BeginRenderPass(commandBuffer, imageIndex);
 	m_RenderContext.BindPipeline(commandBuffer);
@@ -79,7 +79,7 @@ void VulkanRenderer::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 	m_ResourceManager.DrawAll(commandBuffer, m_RenderContext.GetPipeline(), m_CurrentFrame);
 
 	m_RenderContext.EndRenderPass(commandBuffer);
-	m_FrameContext.EndRecording(imageIndex);
+	m_FrameContext.EndRecording(m_CurrentFrame);
 }
 
 

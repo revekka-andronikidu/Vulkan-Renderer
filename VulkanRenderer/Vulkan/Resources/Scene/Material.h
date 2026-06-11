@@ -1,17 +1,12 @@
 #pragma once
 #include "TextureArray.h"
 
-class Material
+struct Material
 {
-public:
-    Material(TextureArray& textureArray, const std::string& texturePath)
-        : m_TextureIndex(textureArray.AddTexture(texturePath))
+	uint32_t textureIndex = 0; // index into the shared TextureArray
+
+    static Material Create(TextureArray& textureArray, const std::string& texturePath)
     {
+        return { textureArray.AddTexture(texturePath) };
     }
-
-    uint32_t GetTextureIndex() const { return m_TextureIndex; }
-
-private:
-    uint32_t m_TextureIndex;  // index into the shared TextureArray
 };
-

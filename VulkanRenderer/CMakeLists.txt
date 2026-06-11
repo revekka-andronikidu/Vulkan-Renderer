@@ -36,9 +36,9 @@ Vulkan/Resources/Buffer.cpp
 Vulkan/Resources/Image.cpp
 Vulkan/Resources/ResourceManager.cpp
 Vulkan/Resources/Scene/Mesh.cpp
-"Vulkan/Resources/Scene/TextureArray.cpp"
+Vulkan/Resources/Scene/TextureArray.cpp
 Vulkan/Rendering/DescriptorPool.cpp
- Vulkan/Resources/Scene/MeshLoader.cpp)
+Vulkan/Resources/Scene/MeshLoader.cpp)
 
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(${TARGET_NAME} PRIVATE Vulkan::Vulkan glfw glm::glm)
@@ -60,7 +60,7 @@ if(NOT EXISTS "${SPONZA_MARKER}")
 
     FetchContent_GetProperties(SponzaScene)
     if(NOT sponzascene_POPULATED)
-        FetchContent_Populate(SponzaScene)
+         FetchContent_MakeAvailable(SponzaScene)
     endif()
 
     # Copy only the Sponza glTF folder — skip the rest of the huge repo

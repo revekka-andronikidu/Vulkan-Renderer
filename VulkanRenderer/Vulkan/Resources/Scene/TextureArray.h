@@ -37,4 +37,3 @@ private:
     void CreateTextureImage(const std::string& path);
 	void WriteDescriptorSets();
 };
-
