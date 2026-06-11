@@ -158,8 +158,8 @@ void Image::GenerateMipmaps(CommandPool& commandPool)
 
     VkCommandBuffer commandBuffer = commandPool.BeginSingleTimeCommands();
 
-    VkImageMemoryBarrier barrier{};
-    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    VkImageMemoryBarrier2 barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
     barrier.image = m_Image;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -168,6 +168,11 @@ void Image::GenerateMipmaps(CommandPool& commandPool)
     barrier.subresourceRange.layerCount = 1;
     barrier.subresourceRange.levelCount = 1;
 
+    VkDependencyInfo dependencyInfo{};
+    dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+    dependencyInfo.imageMemoryBarrierCount = 1;
+    dependencyInfo.pImageMemoryBarriers = &barrier;
+
     int32_t mipWidth = m_TextWidth;
     int32_t mipHeight = m_TextHeight;
 
@@ -175,14 +180,12 @@ void Image::GenerateMipmaps(CommandPool& commandPool)
         barrier.subresourceRange.baseMipLevel = i - 1;
         barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
         barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        barrier.dstStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        barrier.dstAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT;
 
-        vkCmdPipelineBarrier(commandBuffer,
-            VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
-            0, nullptr,
-            0, nullptr,
-            1, &barrier);
+        vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
 
         VkImageBlit blit{};
         blit.srcOffsets[0] = { 0, 0, 0 };
@@ -204,16 +207,15 @@ void Image::GenerateMipmaps(CommandPool& commandPool)
             1, &blit,
             VK_FILTER_LINEAR);
 
+        barrier.subresourceRange.baseMipLevel = i - 1;
         barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
         barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT;
+        barrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+        barrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
 
-        vkCmdPipelineBarrier(commandBuffer,
-            VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
-            0, nullptr,
-            0, nullptr,
-            1, &barrier);
+        vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
 
         if (mipWidth > 1) mipWidth /= 2;
         if (mipHeight > 1) mipHeight /= 2;
@@ -223,25 +225,27 @@ void Image::GenerateMipmaps(CommandPool& commandPool)
     barrier.subresourceRange.baseMipLevel = m_MipLevels - 1;
     barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
     barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+    barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+    barrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+    barrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
 
-    vkCmdPipelineBarrier(commandBuffer,
-        VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
-        0, nullptr,
-        0, nullptr,
-        1, &barrier);
+    vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
 
     commandPool.EndSingleTimeCommands(commandBuffer);
 }
 
-void Image::TransitionImageLayout(CommandPool& commandPool, VkPipelineStageFlags sourceStage, VkPipelineStageFlags destinationStage, VkAccessFlags sourceAccessMask, VkAccessFlags destinationAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout)
+void Image::TransitionImageLayout(CommandPool& commandPool, VkPipelineStageFlags2 sourceStage, VkPipelineStageFlags2 destinationStage, VkAccessFlags2 sourceAccessMask, VkAccessFlags2 destinationAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
     VkCommandBuffer commandBuffer = commandPool.BeginSingleTimeCommands();
 
     // Perform layout transition using image memory barrier
-    VkImageMemoryBarrier barrier = {};
-    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    VkImageMemoryBarrier2  barrier = {};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+    barrier.srcStageMask = sourceStage;
+    barrier.srcAccessMask = sourceAccessMask;
+    barrier.dstStageMask = destinationStage;
+    barrier.dstAccessMask = destinationAccessMask;
     barrier.oldLayout = oldLayout;
     barrier.newLayout = newLayout;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -252,18 +256,13 @@ void Image::TransitionImageLayout(CommandPool& commandPool, VkPipelineStageFlags
     barrier.subresourceRange.levelCount = m_MipLevels;
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
-    barrier.srcAccessMask = sourceAccessMask;
-    barrier.dstAccessMask = destinationAccessMask;
 
-    vkCmdPipelineBarrier(
-        commandBuffer,
-        sourceStage,
-        destinationStage,
-        0,
-        0, nullptr,
-        0, nullptr,
-        1, &barrier
-    );
+    VkDependencyInfo dependencyInfo{};
+    dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+    dependencyInfo.imageMemoryBarrierCount = 1;
+    dependencyInfo.pImageMemoryBarriers = &barrier;
+
+    vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo );
 
     commandPool.EndSingleTimeCommands(commandBuffer);
 }

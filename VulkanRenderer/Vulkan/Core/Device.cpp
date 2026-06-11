@@ -55,14 +55,23 @@ void Device::CreateLogicalDevice()
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceFeatures.samplerAnisotropy = VK_TRUE;
 
+    VkPhysicalDeviceVulkan13Features features13 = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES, .pNext = nullptr};
+	features13.dynamicRendering = VK_TRUE;
+	features13.synchronization2 = VK_TRUE;
+
+  
+    VkPhysicalDeviceFeatures2 deviceFeatures2 = { .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+        .pNext = &features13,
+        .features = deviceFeatures };
+
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-
+    createInfo.pNext = &deviceFeatures2;
 
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
-    createInfo.pEnabledFeatures = &deviceFeatures;
+    createInfo.pEnabledFeatures = nullptr;
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(m_DeviceExtensions.size());
     createInfo.ppEnabledExtensionNames = m_DeviceExtensions.data();
@@ -152,6 +161,12 @@ VkFormat Device::FindDepthFormat()
 
 bool Device::IsDeviceSuitable(VkPhysicalDevice device)
 {
+    VkPhysicalDeviceProperties properties;
+    vkGetPhysicalDeviceProperties(device, &properties);
+
+    if (properties.apiVersion < VK_API_VERSION_1_3)
+        return false;
+
     QueueFamilyIndices indices = FindQueueFamilies(device);
     bool extensionsSupported = CheckDeviceExtensionSupport(device);
 
@@ -162,10 +177,18 @@ bool Device::IsDeviceSuitable(VkPhysicalDevice device)
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }
 
-    VkPhysicalDeviceFeatures supportedFeatures;
-    vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+    VkPhysicalDeviceVulkan13Features features13{};
+    features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
 
-    return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+    VkPhysicalDeviceFeatures2 features2{};
+    features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    features2.pNext = &features13;
+
+    vkGetPhysicalDeviceFeatures2(device, &features2);
+
+    bool hasRequiredFeatures = features13.synchronization2 && features13.dynamicRendering && features2.features.samplerAnisotropy;
+
+    return indices.isComplete() && extensionsSupported && swapChainAdequate && hasRequiredFeatures;
 }
 
 bool Device::CheckDeviceExtensionSupport(VkPhysicalDevice device) 

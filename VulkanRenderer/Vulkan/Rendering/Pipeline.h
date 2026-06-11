@@ -7,7 +7,7 @@ class Device;
 class Pipeline final
 {
 public:
-	Pipeline(Device& device, VkFormat swapChainImageFormat, VkRenderPass renderPass);
+	Pipeline(Device& device, std::vector<VkFormat> colorFormats, VkFormat depthFormat);
 	~Pipeline();
 
 	Pipeline(const Pipeline&) = delete;
@@ -28,8 +28,9 @@ private:
 	VkPipelineLayout m_PipelineLayout;
 	VkDescriptorSetLayout m_MaterialDescriptorSetLayout;
 	VkDescriptorSetLayout m_GlobalDescriptorSetLayout;
-	VkFormat m_SwapChainImageFormat;
-	VkRenderPass m_RenderPass;
+	std::vector<VkFormat> m_ColorFormats;
+	//VkRenderPass m_RenderPass;
+	VkFormat m_DepthFormat;
 	uint32_t m_TextureCount = 0;
 
 	void CreateGraphicsPipeline();

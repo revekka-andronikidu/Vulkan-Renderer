@@ -58,7 +58,7 @@ private:
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.pEngineName = "No Engine";
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_0;
+        appInfo.apiVersion = VK_API_VERSION_1_3;
 
         VkInstanceCreateInfo createInfo{}; //not optional, tells the driver which global extensions and validation layers we want to use
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;

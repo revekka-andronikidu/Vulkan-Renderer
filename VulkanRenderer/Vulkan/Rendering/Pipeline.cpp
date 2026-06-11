@@ -5,11 +5,11 @@
 #include "../Resources/ResourcesUtils.h"
 #include "../Config.h"
 
-Pipeline::Pipeline(Device& device, VkFormat swapChainImageFormat, VkRenderPass renderPass)
+Pipeline::Pipeline(Device& device, std::vector<VkFormat> colorFormats, VkFormat depthFormat)
     : m_Device(device)
-	, m_SwapChainImageFormat(swapChainImageFormat)
-	, m_RenderPass(renderPass)
+	, m_ColorFormats(colorFormats)
     , m_TextureCount(MAX_TEXTURE_ARRAY_SIZE)
+	, m_DepthFormat(depthFormat)
 {
     
     CreateGlobalDescriptorSetLayout();
@@ -170,10 +170,15 @@ void Pipeline::CreateGraphicsPipeline()
     depthStencil.front = {}; // Optional
     depthStencil.back = {}; // Optional
 
-  
+    VkPipelineRenderingCreateInfo pipelineRenderingInfo{};
+    pipelineRenderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+    pipelineRenderingInfo.colorAttachmentCount = static_cast<uint32_t>(m_ColorFormats.size());
+    pipelineRenderingInfo.pColorAttachmentFormats = m_ColorFormats.data();
+    pipelineRenderingInfo.depthAttachmentFormat = m_DepthFormat;
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineInfo.pNext = &pipelineRenderingInfo; // Chain the rendering info for dynamic rendering
     pipelineInfo.stageCount = 2;
     pipelineInfo.pStages = shaderStages;
     pipelineInfo.pVertexInputState = &vertexInputInfo;
@@ -185,7 +190,7 @@ void Pipeline::CreateGraphicsPipeline()
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
     pipelineInfo.layout = m_PipelineLayout;
-    pipelineInfo.renderPass = m_RenderPass;
+    pipelineInfo.renderPass = VK_NULL_HANDLE;
     pipelineInfo.subpass = 0;
     pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional

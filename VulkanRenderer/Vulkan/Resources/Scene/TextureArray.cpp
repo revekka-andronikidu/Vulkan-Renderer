@@ -66,7 +66,7 @@ void TextureArray::CreateTextureImage(const std::string& path)
     m_TextureImages.push_back(std::make_unique<Image>(m_Device, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT));
 
 
-    m_TextureImages[m_TextureImages.size() - 1]->TransitionImageLayout(m_CommandPool, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_NONE, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    m_TextureImages[m_TextureImages.size() - 1]->TransitionImageLayout(m_CommandPool, VK_PIPELINE_STAGE_2_NONE, VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_NONE, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
     m_TextureImages[m_TextureImages.size() - 1]->CopyBufferToImage(m_CommandPool, stagingBuffer.GetBuffer());
 
@@ -76,7 +76,7 @@ void TextureArray::CreateTextureImage(const std::string& path)
     }
     else
     {
-        m_TextureImages[m_TextureImages.size() - 1]->TransitionImageLayout(m_CommandPool, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        m_TextureImages[m_TextureImages.size() - 1]->TransitionImageLayout(m_CommandPool, VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_ACCESS_2_SHADER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     }
 }
 

@@ -25,7 +25,7 @@ public:
 
 
 	void GenerateMipmaps(CommandPool& commandPool);
-	void TransitionImageLayout(CommandPool& commandPool, VkPipelineStageFlags sourceStage, VkPipelineStageFlags destinationStage, VkAccessFlags sourceAccessMask, VkAccessFlags destinationAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void TransitionImageLayout(CommandPool& commandPool, VkPipelineStageFlags2 sourceStage, VkPipelineStageFlags2 destinationStage, VkAccessFlags2 sourceAccessMask, VkAccessFlags2 destinationAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout);
 	void CopyBufferToImage(CommandPool& commandPool, VkBuffer buffer);
 	void CreateImageView();
 

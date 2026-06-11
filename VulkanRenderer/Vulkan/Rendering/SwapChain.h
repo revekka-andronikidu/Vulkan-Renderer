@@ -23,16 +23,19 @@ public:
 	const std::vector<Image>& GetSwapChainImages() const;
 	void RecreateSwapChain(VkRenderPass renderPass, CommandPool& commandPool);
 	VkExtent2D GetExtent() const { return m_SwapChainExtent; }
-	std::vector<VkFramebuffer> GetSwapChainFramebuffers() const { return m_SwapChainFramebuffers; }
+	Image* GetDepthImage() const { return m_DepthImage.get(); };
+	void BeginDynamicRendering(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+	void EndDynamicRendering(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+	//std::vector<VkFramebuffer> GetSwapChainFramebuffers() const { return m_SwapChainFramebuffers; }
 	VkFormat GetSwapChainImageFormat() const;
 
-	void BeginRenderPass(VkCommandBuffer commandBuffer, VkRenderPass renderPass, uint32_t imageIndex);
-	void EndRenderPass(VkCommandBuffer commandBuffer);
+	//void BeginRenderPass(VkCommandBuffer commandBuffer, VkRenderPass renderPass, uint32_t imageIndex);
+	//void EndRenderPass(VkCommandBuffer commandBuffer);
 
 	void Init(CommandPool& commandPool, VkRenderPass renderPass)
 	{
 		CreateDepthResources(commandPool);
-		CreateFramebuffers(renderPass);
+		//CreateFramebuffers(renderPass);
 	}
 
 private:
@@ -42,7 +45,7 @@ private:
 	VkSwapchainKHR m_SwapChain;
 	std::unique_ptr<Image> m_DepthImage;
 	std::vector<Image> m_SwapChainImages;
-	std::vector<VkFramebuffer> m_SwapChainFramebuffers;
+	//std::vector<VkFramebuffer> m_SwapChainFramebuffers;
 	VkExtent2D m_SwapChainExtent;
 
 	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
@@ -51,7 +54,7 @@ private:
 	VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 	VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	void CreateDepthResources(CommandPool& commandPool);
-	void CreateFramebuffers(VkRenderPass renderPass);
+	//void CreateFramebuffers(VkRenderPass renderPass);
 	void CreateImageViews();
 
 };

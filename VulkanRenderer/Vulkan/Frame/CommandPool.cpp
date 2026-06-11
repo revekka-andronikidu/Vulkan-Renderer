@@ -61,12 +61,16 @@ void CommandPool::EndSingleTimeCommands(VkCommandBuffer commandBuffer) const
     VkFence fence;
     vkCreateFence(m_Device.GetDevice(), &fenceInfo, nullptr, &fence);
 
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
+    VkCommandBufferSubmitInfo commandBufferInfo{};
+    commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
+    commandBufferInfo.commandBuffer = commandBuffer;
 
-    vkQueueSubmit(m_Device.GetGraphicsQueue(), 1, &submitInfo, fence);
+    VkSubmitInfo2 submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
+    submitInfo.commandBufferInfoCount = 1;
+    submitInfo.pCommandBufferInfos = &commandBufferInfo;
+
+    vkQueueSubmit2(m_Device.GetGraphicsQueue(), 1, &submitInfo, fence);
     vkWaitForFences(m_Device.GetDevice(), 1, &fence, VK_TRUE, UINT64_MAX);
     vkDestroyFence(m_Device.GetDevice(), fence, nullptr);
 

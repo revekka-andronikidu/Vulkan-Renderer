@@ -18,19 +18,30 @@ public:
     void Submit(VkCommandBuffer commandBuffer, VkSemaphore waitSemaphore,
         VkSemaphore signalSemaphore, VkFence fence)
     {
-        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        VkCommandBufferSubmitInfo commandBufferInfo{};
+        commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
+        commandBufferInfo.commandBuffer = commandBuffer;
 
-        VkSubmitInfo submitInfo{};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = &waitSemaphore;
-        submitInfo.pWaitDstStageMask = waitStages;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = &signalSemaphore;
+        VkSemaphoreSubmitInfo waitInfo{};
+        waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+        waitInfo.semaphore = waitSemaphore;
+        waitInfo.stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
 
-        if (vkQueueSubmit(m_Device.GetGraphicsQueue(), 1, &submitInfo, fence) != VK_SUCCESS)
+        VkSemaphoreSubmitInfo signalInfo{};
+        signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+        signalInfo.semaphore = signalSemaphore;
+        signalInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT;
+
+        VkSubmitInfo2 submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
+        submitInfo.waitSemaphoreInfoCount = 1;
+        submitInfo.pWaitSemaphoreInfos = &waitInfo;
+        submitInfo.commandBufferInfoCount = 1;
+        submitInfo.pCommandBufferInfos = &commandBufferInfo;
+        submitInfo.signalSemaphoreInfoCount = 1;
+        submitInfo.pSignalSemaphoreInfos = &signalInfo;
+
+        if (vkQueueSubmit2(m_Device.GetGraphicsQueue(), 1, &submitInfo, fence) != VK_SUCCESS)
             throw std::runtime_error("failed to submit draw command buffer!");    
     }
 

@@ -69,7 +69,8 @@ void VulkanRenderer::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 {
 	m_FrameContext.BeginRecording(m_CurrentFrame);
 
-	m_RenderContext.BeginRenderPass(commandBuffer, imageIndex);
+	m_RenderContext.BeginDynamicRendering(commandBuffer, imageIndex);
+
 	m_RenderContext.BindPipeline(commandBuffer);
 	m_RenderContext.SetViewportScissor(commandBuffer);
 
@@ -78,7 +79,10 @@ void VulkanRenderer::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
 	m_ResourceManager.DrawAll(commandBuffer, m_RenderContext.GetPipeline(), m_CurrentFrame);
 
-	m_RenderContext.EndRenderPass(commandBuffer);
+	m_RenderContext.EndDynamicRendering(commandBuffer, imageIndex);
+
+
+	//m_RenderContext.EndRenderPass(commandBuffer);
 	m_FrameContext.EndRecording(m_CurrentFrame);
 }
 
