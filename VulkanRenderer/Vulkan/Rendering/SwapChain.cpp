@@ -119,7 +119,6 @@ void SwapChain::RecreateSwapChain(VkRenderPass renderPass, CommandPool& commandP
 
 
     CreateDepthResources(commandPool);
-    //CreateFramebuffers(renderPass);
 }
 
 void SwapChain::CreateImageViews()
@@ -130,11 +129,8 @@ void SwapChain::CreateImageViews()
     }
 }
 
-void SwapChain::CleanupSwapChain() {
-
-    /*for (auto framebuffer : m_SwapChainFramebuffers) {
-        vkDestroyFramebuffer(m_Device.GetDevice(), framebuffer, nullptr);
-    }*/
+void SwapChain::CleanupSwapChain() 
+{
 
     vkDestroySwapchainKHR(m_Device.GetDevice(), m_SwapChain, nullptr);
 }
@@ -263,54 +259,4 @@ void SwapChain::EndDynamicRendering(VkCommandBuffer commandBuffer, uint32_t imag
 
 }
 
-//void SwapChain::CreateFramebuffers(VkRenderPass renderPass)
-//{
-//    m_SwapChainFramebuffers.resize(m_SwapChainImages.size());
-//
-//    for (size_t i = 0; i < m_SwapChainImages.size(); i++)
-//    {
-//        std::array<VkImageView, 2> attachments = 
-//        {
-//            m_SwapChainImages[i].m_ImageView,
-//            m_DepthImage->m_ImageView
-//        };
-//
-//
-//        VkFramebufferCreateInfo framebufferInfo{};
-//        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-//        framebufferInfo.renderPass = renderPass;
-//        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());;
-//        framebufferInfo.pAttachments = attachments.data();;
-//        framebufferInfo.width = m_SwapChainExtent.width;
-//        framebufferInfo.height = m_SwapChainExtent.height;
-//        framebufferInfo.layers = 1;
-//
-//        if (vkCreateFramebuffer(m_Device.GetDevice(), &framebufferInfo, nullptr, &m_SwapChainFramebuffers[i]) != VK_SUCCESS) {
-//            throw std::runtime_error("failed to create framebuffer!");
-//        }
-//    }
-//}
-
-//void SwapChain::BeginRenderPass(VkCommandBuffer commandBuffer, VkRenderPass renderPass, uint32_t imageIndex)
-//{
-//    std::array<VkClearValue, 2> clearValues{};
-//    clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
-//    clearValues[1].depthStencil = { 1.0f, 0 };
-//
-//    VkRenderPassBeginInfo renderPassInfo{};
-//    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-//    renderPassInfo.renderPass = renderPass;
-//    renderPassInfo.framebuffer = m_SwapChainFramebuffers[imageIndex];
-//    renderPassInfo.renderArea.offset = { 0, 0 };
-//    renderPassInfo.renderArea.extent = m_SwapChainExtent;
-//    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());;
-//    renderPassInfo.pClearValues = clearValues.data();;
-//
-//    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-//}
-
-//void SwapChain::EndRenderPass(VkCommandBuffer cmd)
-//{
-//    vkCmdEndRenderPass(cmd);
-//}
 

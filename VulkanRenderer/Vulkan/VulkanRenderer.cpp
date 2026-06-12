@@ -81,8 +81,6 @@ void VulkanRenderer::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
 	m_RenderContext.EndDynamicRendering(commandBuffer, imageIndex);
 
-
-	//m_RenderContext.EndRenderPass(commandBuffer);
 	m_FrameContext.EndRecording(m_CurrentFrame);
 }
 

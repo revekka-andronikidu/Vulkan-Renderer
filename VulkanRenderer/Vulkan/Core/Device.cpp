@@ -59,14 +59,21 @@ void Device::CreateLogicalDevice()
 	features13.dynamicRendering = VK_TRUE;
 	features13.synchronization2 = VK_TRUE;
 
+    VkPhysicalDeviceVulkan12Features features12 = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES};
+	//features12.pNext = &features13;
+	features12.bufferDeviceAddress = VK_TRUE;
   
     VkPhysicalDeviceFeatures2 deviceFeatures2 = { .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
         .pNext = &features13,
         .features = deviceFeatures };
 
+    VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT vertexInputDynamicStateFeatures{};
+    vertexInputDynamicStateFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_INPUT_DYNAMIC_STATE_FEATURES_EXT;
+    vertexInputDynamicStateFeatures.pNext = &deviceFeatures2;
+
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.pNext = &deviceFeatures2;
+    createInfo.pNext = &vertexInputDynamicStateFeatures;
 
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
