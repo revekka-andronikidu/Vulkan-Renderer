@@ -7,7 +7,7 @@ class Device;
 class Pipeline final
 {
 public:
-	Pipeline(Device& device, std::vector<VkFormat> colorFormats, VkFormat depthFormat);
+	Pipeline(Device& device, std::vector<VkFormat> colorFormats, VkFormat depthFormat, bool depthWrite = true, VkCompareOp depthCompareOp = VK_COMPARE_OP_LESS);
 	~Pipeline();
 
 	Pipeline(const Pipeline&) = delete;
@@ -31,6 +31,8 @@ private:
 	std::vector<VkFormat> m_ColorFormats;
 	VkFormat m_DepthFormat;
 	uint32_t m_TextureCount = 0;
+	bool m_DepthWrite = true;
+	VkCompareOp m_DepthCompareOp = VK_COMPARE_OP_LESS;
 
 	void CreateGraphicsPipeline();
 	void CreateMaterialDescriptorSetLayout();

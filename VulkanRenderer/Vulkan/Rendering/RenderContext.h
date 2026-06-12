@@ -4,12 +4,14 @@
 #include "Pipeline.h"
 #include "../Core/VulkanContext.h"
 #include "DescriptorPool.h"
+#include "DepthPrepass.h"
 
 class RenderContext final
 {
 public:
 	RenderContext(Window& window, VulkanContext& context)
 		: m_SwapChain(window, context.GetSurface(), context.GetDevice())
+		, m_DepthPrepass(context.GetDevice(), context.GetDevice().FindDepthFormat())
 		, m_Pipeline(context.GetDevice(), std::vector({ m_SwapChain.GetSwapChainImageFormat() }), context.GetDevice().FindDepthFormat())
 		, m_DescriptorPool(context.GetDevice())
 	{
@@ -19,6 +21,7 @@ public:
 
 	SwapChain& GetSwapChain()  { return m_SwapChain; }
 
+	DepthPrepass& GetDepthPrepass() { return m_DepthPrepass; };
 	Pipeline& GetPipeline() { return m_Pipeline; }
 	DescriptorPool& GetDescriptorPool() { return m_DescriptorPool; }
 
@@ -62,5 +65,6 @@ public:
 private:
 	SwapChain m_SwapChain;
 	Pipeline m_Pipeline;
+	DepthPrepass m_DepthPrepass;
 	DescriptorPool m_DescriptorPool;
 };

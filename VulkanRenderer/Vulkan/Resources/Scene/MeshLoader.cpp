@@ -44,7 +44,17 @@ namespace MeshLoader
                     attrib.texcoords[2 * index.texcoord_index + 0],
                     1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
                 };
-                vertex.color = { 1.0f, 1.0f, 1.0f };
+
+                if (index.normal_index >= 0) {
+                    vertex.normal = {
+                        attrib.normals[3 * index.normal_index + 0],
+                        attrib.normals[3 * index.normal_index + 1],
+                        attrib.normals[3 * index.normal_index + 2]
+                    };
+                }
+                else {
+                    vertex.normal = { 0.0f, 1.0f, 0.0f };  // fallback up vector
+                }
 
                 if (uniqueVertices.count(vertex) == 0)
                 {
@@ -100,6 +110,17 @@ namespace MeshLoader
                         + uvView.byteOffset + uvAccessor.byteOffset);
                 }
 
+                // --- normals --- 
+                const float* normals = nullptr;
+                if (primitive.attributes.count("NORMAL"))
+                {
+                    const auto& normalAccessor = model.accessors[primitive.attributes.at("NORMAL")];
+                    const auto& normalView = model.bufferViews[normalAccessor.bufferView];
+                    normals = reinterpret_cast<const float*>(
+                        model.buffers[normalView.buffer].data.data()
+                        + normalView.byteOffset + normalAccessor.byteOffset);
+                }
+
                 // --- build vertices ---
                 for (size_t i = 0; i < posAccessor.count; i++)
                 {
@@ -108,7 +129,9 @@ namespace MeshLoader
                     v.texCoord = texCoords
                         ? glm::vec2{ texCoords[i * 2], texCoords[i * 2 + 1] }
                     : glm::vec2{ 0.0f, 0.0f };
-                    v.color = { 1.0f, 1.0f, 1.0f };
+                    v.normal = normals
+                        ? glm::vec3{ normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2] }
+                    : glm::vec3{ 0.0f, 1.0f, 0.0f };  // fallback
                     data.vertices.push_back(v);
                 }
 

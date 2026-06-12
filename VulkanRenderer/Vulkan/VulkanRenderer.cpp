@@ -69,17 +69,23 @@ void VulkanRenderer::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 {
 	m_FrameContext.BeginRecording(m_CurrentFrame);
 
-	m_RenderContext.BeginDynamicRendering(commandBuffer, imageIndex);
+	// 1. Depth prepass
+	m_RenderContext.GetDepthPrepass().Begin(commandBuffer, m_RenderContext.GetSwapChain());
+	m_RenderContext.SetViewportScissor(commandBuffer);
+	m_FrameContext.BindFrameDescriptors(commandBuffer, m_RenderContext.GetDepthPrepass().GetPipeline().GetPipelineLayout(), m_CurrentFrame);
+	m_ResourceManager.GetTextureArray().Bind(commandBuffer, m_RenderContext.GetDepthPrepass().GetPipeline().GetPipelineLayout(), m_CurrentFrame);
+	m_ResourceManager.DrawAll(commandBuffer, m_RenderContext.GetDepthPrepass().GetPipeline(), m_CurrentFrame);
+	m_RenderContext.GetDepthPrepass().End(commandBuffer, m_RenderContext.GetSwapChain());
 
+	// 2. Forward pass (unchanged for now)
+	m_RenderContext.BeginDynamicRendering(commandBuffer, imageIndex);
 	m_RenderContext.BindPipeline(commandBuffer);
 	m_RenderContext.SetViewportScissor(commandBuffer);
-
 	m_FrameContext.BindFrameDescriptors(commandBuffer, m_RenderContext.GetPipelineLayout(), m_CurrentFrame);
 	m_ResourceManager.GetTextureArray().Bind(commandBuffer, m_RenderContext.GetPipelineLayout(), m_CurrentFrame);
-
 	m_ResourceManager.DrawAll(commandBuffer, m_RenderContext.GetPipeline(), m_CurrentFrame);
-
 	m_RenderContext.EndDynamicRendering(commandBuffer, imageIndex);
+
 
 	m_FrameContext.EndRecording(m_CurrentFrame);
 }

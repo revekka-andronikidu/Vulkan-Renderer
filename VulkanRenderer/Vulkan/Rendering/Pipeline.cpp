@@ -5,11 +5,13 @@
 #include "../Resources/ResourcesUtils.h"
 #include "../Config.h"
 
-Pipeline::Pipeline(Device& device, std::vector<VkFormat> colorFormats, VkFormat depthFormat)
+Pipeline::Pipeline(Device& device, std::vector<VkFormat> colorFormats, VkFormat depthFormat, bool depthWrite, VkCompareOp depthCompareOp)
     : m_Device(device)
 	, m_ColorFormats(colorFormats)
     , m_TextureCount(MAX_TEXTURE_ARRAY_SIZE)
 	, m_DepthFormat(depthFormat)
+	, m_DepthWrite(depthWrite)
+	, m_DepthCompareOp(depthCompareOp)
 {
     
     CreateGlobalDescriptorSetLayout();
@@ -128,8 +130,8 @@ void Pipeline::CreateGraphicsPipeline()
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
     colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
+    colorBlending.attachmentCount = static_cast<uint32_t>(m_ColorFormats.size());;
+    colorBlending.pAttachments = m_ColorFormats.empty() ? nullptr : &colorBlendAttachment;
     colorBlending.blendConstants[0] = 0.0f; // Optional
     colorBlending.blendConstants[1] = 0.0f; // Optional
     colorBlending.blendConstants[2] = 0.0f; // Optional
@@ -161,8 +163,8 @@ void Pipeline::CreateGraphicsPipeline()
     VkPipelineDepthStencilStateCreateInfo depthStencil{};
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     depthStencil.depthTestEnable = VK_TRUE;
-    depthStencil.depthWriteEnable = VK_TRUE;
-    depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+    depthStencil.depthWriteEnable = m_DepthWrite ? VK_TRUE : VK_FALSE;
+    depthStencil.depthCompareOp = m_DepthCompareOp;
     depthStencil.depthBoundsTestEnable = VK_FALSE;
     depthStencil.minDepthBounds = 0.0f; // Optional
     depthStencil.maxDepthBounds = 1.0f; // Optional

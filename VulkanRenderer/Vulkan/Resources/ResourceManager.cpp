@@ -15,8 +15,12 @@ ResourceManager::ResourceManager(Device& device, RenderContext& renderContext, F
 
     LoadModel(renderContext.GetPipeline().GetMaterialSetLayout(), MODEL_PATH);
 
+    renderContext.GetDepthPrepass().SetTextureCount(m_Textures.GetTextureCount());
+    renderContext.GetDepthPrepass().Build();
+
     renderContext.GetPipeline().SetTextureCount(m_Textures.GetTextureCount());
     renderContext.GetPipeline().Build();
+
  
 }
 
