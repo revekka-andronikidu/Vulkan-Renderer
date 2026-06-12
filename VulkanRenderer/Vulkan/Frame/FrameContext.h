@@ -33,7 +33,7 @@ public:
 	   VkResult result = m_Submitter.Present(renderContext.GetSwapChain().GetHandle(), m_SyncObjects.GetRenderFinishedSemaphore(frameIndex), imageIndex);
        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_FramebufferResized) {
            m_FramebufferResized = false;
-           renderContext.GetSwapChain().RecreateSwapChain(renderContext.GetRenderPass().GetRenderPass(), m_CommandPool);
+           renderContext.GetSwapChain().RecreateSwapChain(m_CommandPool);
        }
        else if (result != VK_SUCCESS) {
            throw std::runtime_error("failed to present swap chain image!");
@@ -45,7 +45,7 @@ public:
 
        if (result == VK_ERROR_OUT_OF_DATE_KHR)
        {
-           renderContext.GetSwapChain().RecreateSwapChain(renderContext.GetRenderPass().GetRenderPass(), m_CommandPool);
+           renderContext.GetSwapChain().RecreateSwapChain(m_CommandPool);
            return;
        }
        else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {

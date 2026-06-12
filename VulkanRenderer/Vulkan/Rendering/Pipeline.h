@@ -1,7 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
-#include "RenderPass.h"
+
 
 class Device;
 class Pipeline final
@@ -29,7 +29,6 @@ private:
 	VkDescriptorSetLayout m_MaterialDescriptorSetLayout;
 	VkDescriptorSetLayout m_GlobalDescriptorSetLayout;
 	std::vector<VkFormat> m_ColorFormats;
-	//VkRenderPass m_RenderPass;
 	VkFormat m_DepthFormat;
 	uint32_t m_TextureCount = 0;
 

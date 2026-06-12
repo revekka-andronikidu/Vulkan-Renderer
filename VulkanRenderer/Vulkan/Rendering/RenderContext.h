@@ -1,6 +1,5 @@
 #pragma once
 #include <vulkan/vulkan.h>
-#include "RenderPass.h"
 #include "SwapChain.h"
 #include "Pipeline.h"
 #include "../Core/VulkanContext.h"
@@ -11,7 +10,6 @@ class RenderContext final
 public:
 	RenderContext(Window& window, VulkanContext& context)
 		: m_SwapChain(window, context.GetSurface(), context.GetDevice())
-		, m_RenderPass(context.GetDevice().GetDevice(), m_SwapChain.GetSwapChainImageFormat(), context.GetDevice().FindDepthFormat())
 		, m_Pipeline(context.GetDevice(), std::vector({ m_SwapChain.GetSwapChainImageFormat() }), context.GetDevice().FindDepthFormat())
 		, m_DescriptorPool(context.GetDevice())
 	{
@@ -20,11 +18,11 @@ public:
 	~RenderContext() = default;
 
 	SwapChain& GetSwapChain()  { return m_SwapChain; }
-	RenderPass& GetRenderPass()  { return m_RenderPass; }
+
 	Pipeline& GetPipeline() { return m_Pipeline; }
 	DescriptorPool& GetDescriptorPool() { return m_DescriptorPool; }
 
-	void InitializeSwapChain(CommandPool& commandPool) { m_SwapChain.Init(commandPool, m_RenderPass.GetRenderPass()); }
+	void InitializeSwapChain(CommandPool& commandPool) { m_SwapChain.Init(commandPool); }
 
 	void SetViewportScissor(VkCommandBuffer commandBuffer)
 	{
@@ -63,7 +61,6 @@ public:
 
 private:
 	SwapChain m_SwapChain;
-	RenderPass m_RenderPass;
 	Pipeline m_Pipeline;
 	DescriptorPool m_DescriptorPool;
 };

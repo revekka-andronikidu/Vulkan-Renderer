@@ -21,7 +21,7 @@ public:
 
 	VkSwapchainKHR GetHandle() const { return m_SwapChain; }
 	const std::vector<Image>& GetSwapChainImages() const;
-	void RecreateSwapChain(VkRenderPass renderPass, CommandPool& commandPool);
+	void RecreateSwapChain( CommandPool& commandPool);
 	VkExtent2D GetExtent() const { return m_SwapChainExtent; }
 	Image* GetDepthImage() const { return m_DepthImage.get(); };
 	void BeginDynamicRendering(VkCommandBuffer commandBuffer, uint32_t imageIndex);
@@ -29,7 +29,7 @@ public:
 	
 	VkFormat GetSwapChainImageFormat() const;
 
-	void Init(CommandPool& commandPool, VkRenderPass renderPass)
+	void Init(CommandPool& commandPool)
 	{
 		CreateDepthResources(commandPool);
 	}

@@ -102,7 +102,7 @@ VkSurfaceFormatKHR SwapChain::ChooseSwapSurfaceFormat(const std::vector<VkSurfac
     return availableFormats[0];
 }
 
-void SwapChain::RecreateSwapChain(VkRenderPass renderPass, CommandPool& commandPool) 
+void SwapChain::RecreateSwapChain(CommandPool& commandPool) 
 {
     int width = 0, height = 0;
     glfwGetFramebufferSize(m_Window.GetWindow(), &width, &height);

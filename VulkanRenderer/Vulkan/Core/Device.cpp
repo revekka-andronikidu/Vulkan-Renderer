@@ -67,13 +67,10 @@ void Device::CreateLogicalDevice()
         .pNext = &features13,
         .features = deviceFeatures };
 
-    VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT vertexInputDynamicStateFeatures{};
-    vertexInputDynamicStateFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_INPUT_DYNAMIC_STATE_FEATURES_EXT;
-    vertexInputDynamicStateFeatures.pNext = &deviceFeatures2;
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.pNext = &vertexInputDynamicStateFeatures;
+    createInfo.pNext = &deviceFeatures2;
 
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
