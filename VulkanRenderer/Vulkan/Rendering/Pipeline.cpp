@@ -223,6 +223,19 @@ VkShaderModule Pipeline::CreateShaderModule(const std::vector<char>& code)
 
 void Pipeline::CreateMaterialDescriptorSetLayout()
 {
+
+    std::vector<VkDescriptorBindingFlags> bindingFlags;
+    bindingFlags.emplace_back();
+   bindingFlags.emplace_back(VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT);
+
+   VkDescriptorSetLayoutCreateFlags flags = 0;
+   flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
+
+	VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsInfo{};
+	bindingFlagsInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+	bindingFlagsInfo.bindingCount = static_cast<uint32_t>(bindingFlags.size());
+	bindingFlagsInfo.pBindingFlags = bindingFlags.data();
+
     VkDescriptorSetLayoutBinding samplerBinding{};
     samplerBinding.binding = 0;
     samplerBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
@@ -235,14 +248,16 @@ void Pipeline::CreateMaterialDescriptorSetLayout()
     textureArrayBinding.descriptorCount = m_TextureCount;  
     textureArrayBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    std::array<VkDescriptorSetLayoutBinding, 2> texture = {
-        samplerBinding, textureArrayBinding
-    };
+
+    std::array<VkDescriptorSetLayoutBinding, 2> bindings = { samplerBinding, textureArrayBinding };
+    
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = static_cast<uint32_t>(texture.size());
-    layoutInfo.pBindings = texture.data();
+    layoutInfo.pNext = &bindingFlagsInfo;
+    layoutInfo.flags = flags;
+    layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+    layoutInfo.pBindings = bindings.data();
     if (vkCreateDescriptorSetLayout(m_Device.GetDevice(), &layoutInfo, nullptr, &m_MaterialDescriptorSetLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor set layout!");
     }

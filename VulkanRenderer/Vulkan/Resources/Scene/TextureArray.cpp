@@ -26,7 +26,7 @@ TextureArray::TextureArray(Device& device, CommandPool& commandPool, DescriptorP
 
 void TextureArray::Build()
 {
-    m_DescriptorSets = m_Pool.AllocateSets(m_Layout);
+    m_DescriptorSet = m_Pool.AllocateSets(m_Layout);
     WriteDescriptorSets();
 }
 
@@ -43,7 +43,7 @@ TextureArray::~TextureArray()
 
 void TextureArray::Bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout, uint32_t frameIndex) const
 {
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 1, 1, &m_DescriptorSets[frameIndex], 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 1, 1, &m_DescriptorSet, 0, nullptr);
 }
 
 
@@ -93,26 +93,25 @@ void TextureArray::WriteDescriptorSets()
         imageInfos[i].sampler = VK_NULL_HANDLE;  // sampler is separate
     }
 
-    for (size_t i = 0; i < m_DescriptorSets.size(); i++)
-    {
+   
         std::array<VkWriteDescriptorSet, 2> writes{};
 
         writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writes[0].dstSet = m_DescriptorSets[i];
+        writes[0].dstSet = m_DescriptorSet;
         writes[0].dstBinding = 0;
         writes[0].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
         writes[0].descriptorCount = 1;
         writes[0].pImageInfo = &samplerInfo;
 
         writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writes[1].dstSet = m_DescriptorSets[i];
+        writes[1].dstSet = m_DescriptorSet;
         writes[1].dstBinding = 1;
         writes[1].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
         writes[1].descriptorCount = static_cast<uint32_t>(imageInfos.size());
         writes[1].pImageInfo = imageInfos.data();
 
         vkUpdateDescriptorSets(m_Device.GetDevice(), static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
-    }
+    
 }
 
 

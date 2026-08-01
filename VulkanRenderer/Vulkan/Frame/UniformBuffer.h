@@ -35,7 +35,7 @@ private:
     uint32_t m_MaxFramesInFlight;
     std::vector<void*> m_UniformBuffersMapped;
     std::vector<Buffer> m_UniformBuffers;
-    std::vector<VkDescriptorSet> m_DescriptorSets;
+    VkDescriptorSet m_DescriptorSet;
 
     void CreateUniformBuffers();
     void WriteDescriptorSets();

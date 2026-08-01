@@ -31,7 +31,7 @@ private:
 	DescriptorPool& m_Pool;
 	VkDescriptorSetLayout m_Layout;
 	std::vector<std::unique_ptr<Image>> m_TextureImages;
-    std::vector<VkDescriptorSet> m_DescriptorSets;
+    VkDescriptorSet m_DescriptorSet;
 	std::shared_ptr<TextureSampler> m_TextureSampler;
 
     void CreateTextureImage(const std::string& path);

@@ -31,6 +31,7 @@ void DescriptorPool::CreateDescriptorPool()
 	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 	poolInfo.pPoolSizes = poolSizes.data();
+	poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
 	poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * 2);
 
 	if (vkCreateDescriptorPool(m_Device.GetDevice(), &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS) {
@@ -38,24 +39,32 @@ void DescriptorPool::CreateDescriptorPool()
 	}
 }
 
-std::vector<VkDescriptorSet> DescriptorPool::AllocateSets(VkDescriptorSetLayout layout)
+VkDescriptorSet DescriptorPool::AllocateSets(VkDescriptorSetLayout layout)
 {
-	std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, layout);
+	//std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, layout);
+
+	const uint32_t variableCount = 200;
+
+	VkDescriptorSetVariableDescriptorCountAllocateInfo variableCountInfo{};
+	variableCountInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
+	variableCountInfo.descriptorSetCount = 1;
+	variableCountInfo.pDescriptorCounts = &variableCount;
 
 	VkDescriptorSetAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.pNext = &variableCountInfo;
 	allocInfo.descriptorPool = m_DescriptorPool;
-	allocInfo.descriptorSetCount = MAX_FRAMES_IN_FLIGHT;
-	allocInfo.pSetLayouts = layouts.data();
+	allocInfo.descriptorSetCount = 1;
+	allocInfo.pSetLayouts = &layout;
 
-	std::vector<VkDescriptorSet> sets(MAX_FRAMES_IN_FLIGHT);
+	VkDescriptorSet set;
 
-	if (vkAllocateDescriptorSets(m_Device.GetDevice(),&allocInfo, sets.data()) != VK_SUCCESS)
+	if (vkAllocateDescriptorSets(m_Device.GetDevice(),&allocInfo, &set) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to allocate descriptor sets!");
 	}
 
-	return sets;
+	return  set;
 }
 
 

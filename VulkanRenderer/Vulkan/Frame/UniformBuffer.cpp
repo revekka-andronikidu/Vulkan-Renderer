@@ -8,10 +8,10 @@ UniformBuffer::UniformBuffer(Device& device, CommandPool& commadPool, RenderCont
     , m_CommandPool(commadPool)
     , m_UniformBuffers()
 	, m_UniformBuffersMapped()
-	, m_DescriptorSets()
+	, m_DescriptorSet()
 {
     CreateUniformBuffers();
-    m_DescriptorSets = renderer.GetDescriptorPool().AllocateSets(renderer.GetPipeline().GetGlobalSetLayout());
+    m_DescriptorSet = renderer.GetDescriptorPool().AllocateSets(renderer.GetPipeline().GetGlobalSetLayout());
     WriteDescriptorSets();
 }
 
@@ -41,7 +41,7 @@ void UniformBuffer::WriteDescriptorSets()
 
         VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrite.dstSet = m_DescriptorSets[i];
+        descriptorWrite.dstSet = m_DescriptorSet;
         descriptorWrite.dstBinding = 0;
         descriptorWrite.dstArrayElement = 0;
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -59,5 +59,5 @@ void UniformBuffer::Update(uint32_t frameIndex, const UniformBufferObject& ubo)
 
 void UniformBuffer::Bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout, uint32_t frameIndex) const
 {
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 0, 1, &m_DescriptorSets[frameIndex], 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 0, 1, &m_DescriptorSet, 0, nullptr);
 }

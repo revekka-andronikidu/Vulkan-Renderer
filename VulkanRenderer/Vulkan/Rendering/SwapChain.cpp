@@ -80,12 +80,7 @@ void SwapChain::CreateSwapChain()
 
     for (uint32_t i = 0; i < imageCount; i++)
     {
-        m_SwapChainImages.emplace_back(
-            m_Device,
-            rawImages[i],
-            surfaceFormat.format,
-            VK_IMAGE_ASPECT_COLOR_BIT
-        );
+        m_SwapChainImages.emplace_back(m_Device,rawImages[i],surfaceFormat.format,VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
     m_SwapChainExtent = extent;

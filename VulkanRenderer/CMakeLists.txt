@@ -30,6 +30,7 @@ Vulkan/VulkanRenderer.cpp
 Vulkan/Core/Device.cpp
 Vulkan/Rendering/SwapChain.cpp
 Vulkan/Rendering/Pipeline.cpp
+Vulkan/Rendering/DepthPrepass.cpp
 Vulkan/Frame/UniformBuffer.cpp
 Vulkan/Frame/CommandPool.cpp
 Vulkan/Resources/Buffer.cpp
@@ -38,7 +39,8 @@ Vulkan/Resources/ResourceManager.cpp
 Vulkan/Resources/Scene/Mesh.cpp
 Vulkan/Resources/Scene/TextureArray.cpp
 Vulkan/Rendering/DescriptorPool.cpp
-Vulkan/Resources/Scene/MeshLoader.cpp)
+Vulkan/Resources/Scene/MeshLoader.cpp
+)
 
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(${TARGET_NAME} PRIVATE Vulkan::Vulkan glfw glm::glm)

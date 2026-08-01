@@ -33,6 +33,7 @@ private:
 	uint32_t m_TextureCount = 0;
 	bool m_DepthWrite = true;
 	VkCompareOp m_DepthCompareOp = VK_COMPARE_OP_LESS;
+	
 
 	void CreateGraphicsPipeline();
 	void CreateMaterialDescriptorSetLayout();

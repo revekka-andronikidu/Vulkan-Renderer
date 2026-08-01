@@ -10,7 +10,7 @@ public:
 	~DescriptorPool();
 
 	VkDescriptorPool GetHandle() const { return m_DescriptorPool; }
-	std::vector<VkDescriptorSet> AllocateSets(VkDescriptorSetLayout layout);
+	VkDescriptorSet AllocateSets(VkDescriptorSetLayout layout);
 
 	DescriptorPool(const DescriptorPool&) = delete;
 	DescriptorPool& operator=(const DescriptorPool&) = delete;
